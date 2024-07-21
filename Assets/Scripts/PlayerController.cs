@@ -112,7 +112,8 @@ public class PlayerController : MonoBehaviour
                     {
                         KillBallsInsidePolygon();  // changed: Handle damage for other polygons
                     }
-                    TransformExtraTraitIntoNormalBalls(currentLength, keyValuePair.Value.Item1);  // Handle extra trait
+                    if(polygonType != -1) 
+                        TransformExtraTraitIntoNormalBalls(keyValuePair.Key, polygonType);  // Handle extra trait
                     ClearData();
                     _trailRenderer.Clear();
                     _trailRenderer.enabled = false;
@@ -289,17 +290,50 @@ public class PlayerController : MonoBehaviour
         }
     }
     
-    void TransformExtraTraitIntoNormalBalls(float currentLength, float validLength)  // New method to handle extra trait
+    void TransformExtraTraitIntoNormalBalls(Vector2 intersectionPoint, int polygonEdgesCount)  // New method to handle extra trait
     {
-        float extraLength = currentLength - validLength;
-        int numberOfBalls = Mathf.CeilToInt(extraLength * EnergySystem.energyConsumptionRate * 100f);  // Adjust energy-to-balls ratio as needed
-        Debug.Log($"extra trait length: {extraLength}");
+        List<Vector2> extraSegmentStartPositions = new List<Vector2>();
+        List<Vector2> extraSegmentEndPositions = new List<Vector2>();
+        
+        var extraSegmentsCount = segmentStartPositions.Count - polygonEdgesCount;
+        extraSegmentsCount += 1; // the moving line should count as an edge but wasn't included in the segmentStartPositions.Count
+        extraSegmentsCount += 1; // The intersection segment split into two parts.
+        
+        for (int i = 0; i < extraSegmentsCount ; i++)
+        {
+            extraSegmentStartPositions.Add(segmentStartPositions[i]);
+            extraSegmentEndPositions.Add(segmentEndPositions[i]);
+
+            if (i == extraSegmentsCount - 1)
+            {
+                extraSegmentStartPositions.Add(segmentEndPositions[i]);
+                extraSegmentEndPositions.Add(intersectionPoint); // The intersection segment split into two parts.
+                break;
+            }
+        }
+        
+        float extraLength = CalculateTotalLength(extraSegmentStartPositions, extraSegmentEndPositions);
+        int numberOfBalls = Mathf.CeilToInt(extraLength * EnergySystem.energyConsumptionRate / 10f);  // Adjust energy-to-balls ratio as needed
+
         for (int i = 0; i < numberOfBalls; i++)
         {
-            Vector2 spawnPosition = Vector2.Lerp(segmentStartPositions[i % segmentStartPositions.Count], segmentEndPositions[i % segmentEndPositions.Count], Random.Range(0f, 1f));
+            int index = i % extraSegmentStartPositions.Count;
+            Vector2 start = extraSegmentStartPositions[index];
+            Vector2 end = extraSegmentEndPositions[index];
+            Vector2 spawnPosition = Vector2.Lerp(start, end, Random.Range(0f, 1f));
             GameObject ball = normalBallPool.GetObject();
             ball.transform.position = spawnPosition;
         }
+    }
+    
+    float CalculateTotalLength(List<Vector2> startPositions, List<Vector2> endPositions)  // New method to calculate total length of extra segments
+    {
+        float totalLength = 0f;
+        for (int i = 0; i < startPositions.Count; i++)
+        {
+            totalLength += Vector2.Distance(startPositions[i], endPositions[i]);
+        }
+        return totalLength;
     }
     
     void TransformTraitIntoNormalBalls()  // New method to transform trait into normal balls
