@@ -77,6 +77,7 @@ public class EvilBall : MonoBehaviour
             return;  // Absorb the damage
         }
         health -= damage;
+        Debug.Log($"EvilBall takes {damage} damage");
         UpdateHealthText();
         if (health <= 0)
         {

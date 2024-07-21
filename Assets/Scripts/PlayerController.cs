@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using Random = UnityEngine.Random;
 
 public class PlayerController : MonoBehaviour
@@ -17,6 +18,7 @@ public class PlayerController : MonoBehaviour
     public ObjectPool normalBallPool;  // Reference to the Object Pool for normal balls
     public ObjectPool evilBallPool;  // Reference to the Object Pool for evil balls
     public GameObject polygonVisualizerPrefab;  // Reference to the Polygon Visualizer prefab
+    public GameObject Marker;
 
     
     private float energyConsumedForCurrentTrait = 0f;  // Track energy consumed for current trait
@@ -29,6 +31,9 @@ public class PlayerController : MonoBehaviour
     private Vector2 currentDirection;
     private Dictionary<Vector2, (float, int)> intersectionResults = new ();
     private bool isNewPoly;
+    
+    private List<GameObject> normalBalls = new List<GameObject>();  // List to manage normal balls
+    private List<GameObject> evilBalls = new List<GameObject>();  // List to manage evil balls
 
     private void Awake()
     {
@@ -436,6 +441,10 @@ public class PlayerController : MonoBehaviour
                 intersectCount++;
             }
         }
+
+        // var isIn = (intersectCount % 2) == 1;
+        // if (isIn) Instantiate(Marker, new Vector3(point.x, point.y, 0), quaternion.identity);
+        
         return (intersectCount % 2) == 1;
     }
     
