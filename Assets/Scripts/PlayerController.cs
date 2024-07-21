@@ -1,7 +1,5 @@
-using System;
 using UnityEngine;
 using System.Collections.Generic;
-using Unity.Mathematics;
 using Random = UnityEngine.Random;
 
 public class PlayerController : MonoBehaviour
@@ -19,6 +17,7 @@ public class PlayerController : MonoBehaviour
     public ObjectPool evilBallPool;  // Reference to the Object Pool for evil balls
     public GameObject polygonVisualizerPrefab;  // Reference to the Polygon Visualizer prefab
     public GameObject Marker;
+    public GameObject notificationDisplayPrefab;  // Reference to the notification display prefab
 
     
     private float energyConsumedForCurrentTrait = 0f;  // Track energy consumed for current trait
@@ -272,6 +271,7 @@ public class PlayerController : MonoBehaviour
             normalBallPool.ReturnObject(col.gameObject);// Remove the normal ball
             EnergySystem.GainEnergy(EnergySystem.energyGainAmount);
             ScoringSystem.AddScore(1);  // Add score for killing normal ball
+            DisplayNotification("+1", Color.blue);
         }
     }
 
@@ -295,6 +295,7 @@ public class PlayerController : MonoBehaviour
             Vector2 bounceDirection = (transform.position - col.transform.position).normalized;
             rb.velocity = bounceDirection * bounceForce;
             HealthSystem.TakeDamage(10f);  // Adjust damage value as necessary
+            DisplayNotification("-10", Color.red);
         }
     }
     
@@ -474,6 +475,13 @@ public class PlayerController : MonoBehaviour
                 evilBall.player = transform;  // Set the player reference
             }
         }
+    }
+    
+    void DisplayNotification(string message, Color color)
+    {
+        Vector3 spawnPosition = transform.position + Vector3.up * 2;  // Adjust spawn position as needed
+        GameObject notification = Instantiate(notificationDisplayPrefab, spawnPosition, Quaternion.identity);
+        notification.GetComponent<NotificationDisplay>().Initialize(message, color);
     }
     
     public void ResetPlayer()
