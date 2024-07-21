@@ -16,6 +16,8 @@ public class PlayerController : MonoBehaviour
     public int initialSpawnCount = 10;  // Number of normal balls to spawn at the start
     public ObjectPool normalBallPool;  // Reference to the Object Pool for normal balls
     public ObjectPool evilBallPool;  // Reference to the Object Pool for evil balls
+    public GameObject polygonVisualizerPrefab;  // Reference to the Polygon Visualizer prefab
+
     
     private float energyConsumedForCurrentTrait = 0f;  // Track energy consumed for current trait
     private Vector2 lastPosition;
@@ -96,6 +98,7 @@ public class PlayerController : MonoBehaviour
                     int polygonType = keyValuePair.Value.Item2;
                     Debug.Log($"{GetPolygonType(polygonType)} formed");
                     polygonEnergy = energyConsumedForCurrentTrait;  // Set the energy used for the polygon
+                    ShowPolygon(keyValuePair.Key, polygonType);  // Show the polygon visual
                     if (polygonType == 4)  // changed: Check if quadrilateral
                     {
                         BreakEvilBallsInsidePolygon();  // changed: Handle breaking shields for quadrilaterals
@@ -287,6 +290,36 @@ public class PlayerController : MonoBehaviour
             Vector2 bounceDirection = (transform.position - col.transform.position).normalized;
             rb.velocity = bounceDirection * bounceForce;
             HealthSystem.TakeDamage(10f);  // Adjust damage value as necessary
+        }
+    }
+    
+    void ShowPolygon(Vector2 intersectionPoint, int polygonEdgesCount) // New method to show polygon visual
+    {
+        if(polygonEdgesCount < 3) return;
+        
+        List<Vector2> polygonPoints = new List<Vector2>();
+        
+        polygonPoints.Add(intersectionPoint);
+
+        for (int i = segmentEndPositions.Count - 1; i >= segmentEndPositions.Count - polygonEdgesCount + 1 ; i--)
+        {
+            polygonPoints.Add(segmentEndPositions[i]);
+        }
+        
+        Color polygonColor = GetPolygonColor(polygonPoints.Count);
+
+        GameObject polygonVisualizer = Instantiate(polygonVisualizerPrefab, Vector3.zero, Quaternion.identity);
+        polygonVisualizer.GetComponent<PolygonVisualizer>().SetPoints(polygonPoints, polygonColor);
+    }
+    
+    Color GetPolygonColor(int sides)
+    {
+        switch (sides)
+        {
+            case 3: return Color.red;         // Triangle
+            case 4: return Color.blue;       // Quadrilateral
+            case 5: return Color.green;        // Pentagon
+            default: return Color.white;      // Default
         }
     }
     
