@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class EvilBall : MonoBehaviour
@@ -7,6 +8,7 @@ public class EvilBall : MonoBehaviour
     public float speed = 0.5f;  // Speed of the evil ball
     public Transform player;  // Reference to the player
     public GameObject Shield;
+    public ScoringSystem ScoringSystem;
 
     private void Update()
     {
@@ -52,13 +54,14 @@ public class EvilBall : MonoBehaviour
         
     }
     
-    public int minHealth = 200;
-    public int maxHealth = 1000;
+    [FormerlySerializedAs("minHealth")] public int minHealthRandom = 30;
+    [FormerlySerializedAs("maxHealth")] public int maxHealthRandom = 200;
     public ObjectPool EvilBallPool;
     public int health = 100;
     public TextMeshProUGUI healthText;
     public int healthGainAmount = 10;  // Amount of health gained by killing a normal ball
-    
+
+    private int maxHealth;
     private bool hasShield = false;  // Shield status
     private float shieldCooldown = 10f;  // Cooldown for gaining shield
     private float shieldTimer = 0f;  // Timer for shield activation
@@ -66,6 +69,7 @@ public class EvilBall : MonoBehaviour
     void Start()
     {
         UpdateHealthText();
+        ScoringSystem = FindObjectOfType<ScoringSystem>();
     }
 
     public void TakeDamage(int damage)
@@ -81,13 +85,15 @@ public class EvilBall : MonoBehaviour
         UpdateHealthText();
         if (health <= 0)
         {
+            ScoringSystem.AddScore(maxHealth / 10);
             ReturnToPool();
         }
     }
     
     public void SetRandomHealth()
     {
-        health = Random.Range(minHealth, maxHealth);
+        health = Random.Range(minHealthRandom, maxHealthRandom);
+        maxHealth = health;
         UpdateHealthText();
     }
 
@@ -95,7 +101,7 @@ public class EvilBall : MonoBehaviour
     {
         if (healthText != null)
         {
-            healthText.text = health.ToString();
+            healthText.text = $"{health}/{maxHealth}";
         }
     }
     
