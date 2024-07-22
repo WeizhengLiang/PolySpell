@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using Kalkatos.DottedArrow;
 using Random = UnityEngine.Random;
 
 public class PlayerController : MonoBehaviour
@@ -18,6 +19,7 @@ public class PlayerController : MonoBehaviour
     public GameObject polygonVisualizerPrefab;  // Reference to the Polygon Visualizer prefab
     public GameObject Marker;
     public GameObject notificationDisplayPrefab;  // Reference to the notification display prefab
+    public Arrow Arrow;
 
     
     private float energyConsumedForCurrentTrait = 0f;  // Track energy consumed for current trait
@@ -54,10 +56,12 @@ public class PlayerController : MonoBehaviour
         {
             // Slow down time for aiming
             Time.timeScale = 0.2f;
+            Arrow.SetupAndActivate(transform);
         }
 
         if (Input.GetMouseButtonUp(0) && GameManager.gameUI.activeSelf)
         {
+            Arrow.Deactivate();
             if (!EnergySystem.IsEnergyEmpty)
             {
                 if (isNewPoly)
@@ -271,7 +275,7 @@ public class PlayerController : MonoBehaviour
             normalBallPool.ReturnObject(col.gameObject);// Remove the normal ball
             EnergySystem.GainEnergy(EnergySystem.energyGainAmount);
             ScoringSystem.AddScore(1);  // Add score for killing normal ball
-            DisplayNotification("+1", Color.blue);
+            // DisplayNotification("+1", Color.blue);
         }
     }
 
@@ -295,7 +299,7 @@ public class PlayerController : MonoBehaviour
             Vector2 bounceDirection = (transform.position - col.transform.position).normalized;
             rb.velocity = bounceDirection * bounceForce;
             HealthSystem.TakeDamage(10f);  // Adjust damage value as necessary
-            DisplayNotification("-10", Color.red);
+            // DisplayNotification("-10", Color.red);
         }
     }
     
