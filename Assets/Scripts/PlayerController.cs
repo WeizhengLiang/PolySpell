@@ -340,20 +340,17 @@ public class PlayerController : MonoBehaviour
         
         var extraSegmentsCount = segmentStartPositions.Count - polygonEdgesCount;
         extraSegmentsCount += 1; // the moving line should count as an edge but wasn't included in the segmentStartPositions.Count
-        extraSegmentsCount += 1; // The intersection segment split into two parts.
         
         for (int i = 0; i < extraSegmentsCount ; i++)
         {
             extraSegmentStartPositions.Add(segmentStartPositions[i]);
             extraSegmentEndPositions.Add(segmentEndPositions[i]);
-
-            if (i == extraSegmentsCount - 1)
-            {
-                extraSegmentStartPositions.Add(segmentEndPositions[i]);
-                extraSegmentEndPositions.Add(intersectionPoint); // The intersection segment split into two parts.
-                break;
-            }
         }
+        
+        extraSegmentStartPositions.Add(segmentStartPositions[extraSegmentsCount]);
+        extraSegmentEndPositions.Add(intersectionPoint); // The intersection segment split into two parts.
+        
+     
         
         float extraLength = CalculateTotalLength(extraSegmentStartPositions, extraSegmentEndPositions);
         int numberOfBalls = Mathf.CeilToInt(extraLength * EnergySystem.energyConsumptionRate / 10f);  // Adjust energy-to-balls ratio as needed
