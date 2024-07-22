@@ -4,10 +4,12 @@ using UnityEngine.Serialization;
 
 public class EvilBall : MonoBehaviour
 {
-    public float speed = 0.5f;  // Speed of the evil ball
     public Transform player;  // Reference to the player
     public GameObject Shield;
     public ScoringSystem ScoringSystem;
+    
+    private Rigidbody2D rb;
+    private float baseSpeed = 2f;
 
     private void Update()
     {
@@ -19,7 +21,7 @@ public class EvilBall : MonoBehaviour
     void MoveTowardsPlayer()
     {
         Vector2 direction = (player.position - transform.position).normalized;
-        transform.Translate(direction * speed * Time.deltaTime);
+        transform.Translate(direction * baseSpeed * Time.deltaTime);
     }
 
     void HandleShield()
@@ -53,8 +55,8 @@ public class EvilBall : MonoBehaviour
         
     }
     
-    [FormerlySerializedAs("minHealth")] public int minHealthRandom = 30;
-    [FormerlySerializedAs("maxHealth")] public int maxHealthRandom = 200;
+    [FormerlySerializedAs("minHealth")] public int minHealthRandom = 200;
+    [FormerlySerializedAs("maxHealth")] public int maxHealthRandom = 500;
     public ObjectPool EvilBallPool;
     public int health = 100;
     public TextMeshProUGUI healthText;
@@ -69,6 +71,7 @@ public class EvilBall : MonoBehaviour
     {
         UpdateHealthText();
         ScoringSystem = FindObjectOfType<ScoringSystem>();
+        rb = GetComponent<Rigidbody2D>();
     }
 
     public void TakeDamage(int damage)
@@ -114,7 +117,19 @@ public class EvilBall : MonoBehaviour
     {
         if (col.gameObject.CompareTag("NormalBall"))
         {
-            col.gameObject.GetComponent<NormalBall>()?.ReturnToPool();  // Remove the normal ball
+            NormalBall normalBall = col.gameObject.GetComponent<NormalBall>();
+
+            if (normalBall.powerUp == NormalBall.PowerUpType.Size)
+            {
+                transform.localScale *= 1.5f;  // Evil ball grows in size
+            }
+            else if (normalBall.powerUp == NormalBall.PowerUpType.Speed)
+            {
+                baseSpeed *= 1.5f;  // Evil ball gains speed
+                rb.velocity *= 1.5f;
+            }
+            
+            normalBall.ReturnToPool();  // Remove the normal ball
             GainHealth(healthGainAmount);  // Gain health for the evil ball
         }
     }

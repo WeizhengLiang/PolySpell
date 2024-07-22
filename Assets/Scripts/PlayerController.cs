@@ -272,6 +272,30 @@ public class PlayerController : MonoBehaviour
     {
         if (col.gameObject.CompareTag("NormalBall"))
         {
+            NormalBall normalBall = col.gameObject.GetComponent<NormalBall>();
+
+            if (normalBall.powerUp == NormalBall.PowerUpType.Size)
+            {
+                var scale = transform.localScale * 0.5f;
+                if (scale.x >= 0.1f)
+                {
+                    transform.localScale = scale;  // Bob shrinks in size
+                }
+                else
+                {
+                    transform.localScale = new Vector3(0.1f, 0.1f, 1f);
+                }
+                _trailRenderer.startWidth = transform.localScale.x;
+
+                // DisplayNotification("Size Down!", Color.yellow);
+            }
+            else if (normalBall.powerUp == NormalBall.PowerUpType.Speed)
+            {
+                // rb.velocity *= 1.5f;  // Bob gains speed
+                shootForce *= 1.1f;
+                // DisplayNotification("Speed Up!", Color.blue);
+            }
+            
             normalBallPool.ReturnObject(col.gameObject);// Remove the normal ball
             EnergySystem.GainEnergy(EnergySystem.energyGainAmount);
             ScoringSystem.AddScore(1);  // Add score for killing normal ball
@@ -494,6 +518,7 @@ public class PlayerController : MonoBehaviour
         // Reset trail renderer
         _trailRenderer.Clear();
         _trailRenderer.enabled = false;
+        _trailRenderer.startWidth = 0.6f;
 
         // Reset internal state
         isMoving = false;
