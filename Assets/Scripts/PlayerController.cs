@@ -511,9 +511,10 @@ public class PlayerController : MonoBehaviour
     
     public void ResetPlayer()
     {
-        // Reset position
+        // Reset bob
         transform.position = Vector2.zero;
         rb.velocity = Vector2.zero;
+        transform.localScale = new Vector3(0.6f, 0.6f, 1);
 
         // Reset trail renderer
         _trailRenderer.Clear();
