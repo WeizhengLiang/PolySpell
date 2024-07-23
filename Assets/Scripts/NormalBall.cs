@@ -1,5 +1,7 @@
+using System;
 using TMPro;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class NormalBall : MonoBehaviour
 {
@@ -50,6 +52,11 @@ public class NormalBall : MonoBehaviour
             spriteRenderer.color = Color.blue;  // Normal ball color
             Text.text = "Normal";
         }
+    }
+
+    private void OnBecameInvisible()
+    {
+        ReturnToPool();
     }
 
     public void ReturnToPool()
