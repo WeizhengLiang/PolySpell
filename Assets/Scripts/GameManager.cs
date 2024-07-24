@@ -5,6 +5,7 @@ public class GameManager : MonoBehaviour
 {
     public ScoringSystem ScoringSystem;
     public PlayerController playerController;  // Reference to the PlayerController
+    public BallSpawner BallSpawner;
     public GameObject mainMenu;
     public GameObject gameUI;
     public GameObject endScreen;
@@ -60,8 +61,7 @@ public class GameManager : MonoBehaviour
     {
         if (spawnedCount < spawnCount && gameTimer <= spawnIntervals[spawnedCount])
         {
-            playerController.SpawnNormalBalls(5);  // Spawn 5 normal balls
-            playerController.SpawnEvilBalls(1);  // Spawn 1 evil ball with random health
+            BallSpawner.SpawnInitialBalls(5, 1);
             spawnedCount++;
         }
     }
@@ -81,8 +81,7 @@ public class GameManager : MonoBehaviour
         ScoringSystem.ResetScore();  // Reset score at the start of the game
         UpdateTimerText();  // Initialize the timer text
         InitializeSpawnIntervals();  // Initialize spawn intervals for the game
-        playerController.SpawnNormalBalls(playerController.initialSpawnCount);  // Spawn initial normal balls
-        playerController.SpawnEvilBalls(3);  // Spawn initial evil balls with random health
+        BallSpawner.SpawnInitialBalls(playerController.initialSpawnCount, 3);
     }
 
     public void EndGame()

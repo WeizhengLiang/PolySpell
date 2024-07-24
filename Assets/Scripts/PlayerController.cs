@@ -20,6 +20,7 @@ public class PlayerController : MonoBehaviour
     public GameObject Marker;
     public GameObject notificationDisplayPrefab;  // Reference to the notification display prefab
     public Arrow Arrow;
+    public BallSpawner BallSpawner;
 
     
     private float energyConsumedForCurrentTrait = 0f;  // Track energy consumed for current trait
@@ -385,8 +386,7 @@ public class PlayerController : MonoBehaviour
             Vector2 start = extraSegmentStartPositions[index];
             Vector2 end = extraSegmentEndPositions[index];
             Vector2 spawnPosition = Vector2.Lerp(start, end, Random.Range(0f, 1f));
-            GameObject ball = normalBallPool.GetObject();
-            ball.transform.position = spawnPosition;
+            StartCoroutine(BallSpawner.SpawnNormalBallWithAnimation(spawnPosition));
         }
     }
     
@@ -406,8 +406,7 @@ public class PlayerController : MonoBehaviour
         for (int i = 0; i < numberOfBalls; i++)
         {
             Vector2 spawnPosition = Vector2.Lerp(segmentStartPositions[i % segmentStartPositions.Count], segmentEndPositions[i % segmentEndPositions.Count], Random.Range(0f, 1f));
-            GameObject ball = normalBallPool.GetObject();
-            ball.transform.position = spawnPosition;
+            StartCoroutine(BallSpawner.SpawnNormalBallWithAnimation(spawnPosition));
         }
     }
     
@@ -476,38 +475,12 @@ public class PlayerController : MonoBehaviour
     
     // Add this field to reference the amount of energy to form the polygon
 
-    public void SpawnNormalBalls(int count)
-    {
-        for (int i = 0; i < count; i++)
-        {
-            Vector2 spawnPosition = new Vector2(Random.Range(-8f, 8f), Random.Range(-4.5f, 4.5f));
-            GameObject ball = normalBallPool.GetObject();
-            ball.transform.position = spawnPosition;
-        }
-    }
-    
-    public void SpawnEvilBalls(int count)
-    {
-        for (int i = 0; i < count; i++)
-        {
-            Vector2 spawnPosition = new Vector2(Random.Range(-8f, 8f), Random.Range(-4.5f, 4.5f));
-            GameObject ball = evilBallPool.GetObject();
-            ball.transform.position = spawnPosition;
-            
-            EvilBall evilBall = ball.GetComponent<EvilBall>();
-            if (evilBall != null)
-            {
-                evilBall.player = transform;  // Set the player reference
-            }
-        }
-    }
-    
-    void DisplayNotification(string message, Color color)
-    {
-        Vector3 spawnPosition = transform.position + Vector3.up * 2;  // Adjust spawn position as needed
-        GameObject notification = Instantiate(notificationDisplayPrefab, spawnPosition, Quaternion.identity);
-        notification.GetComponent<NotificationDisplay>().Initialize(message, color);
-    }
+    // void DisplayNotification(string message, Color color)
+    // {
+    //     Vector3 spawnPosition = transform.position + Vector3.up * 2;  // Adjust spawn position as needed
+    //     GameObject notification = Instantiate(notificationDisplayPrefab, spawnPosition, Quaternion.identity);
+    //     notification.GetComponent<NotificationDisplay>().Initialize(message, color);
+    // }
     
     public void ResetPlayer()
     {
