@@ -13,19 +13,27 @@ public class NormalBall : MonoBehaviour
     public SpriteRenderer spriteRenderer;
     public TextMeshProUGUI Text;
 
+    private Rigidbody2D rb;
+
     private Vector2 direction;
     void Start()
     {
-        // Assign a random direction
-        direction = Random.insideUnitCircle.normalized;
+        rb = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
-        AssignPowerUp();
+        Initialize();
     }
 
     void Update()
     {
         // Move the normal ball in the assigned direction
-        transform.Translate(direction * speed * Time.deltaTime);
+        // transform.Translate(direction * speed * Time.deltaTime);
+    }
+
+    public void Initialize()
+    {
+        direction = Random.insideUnitCircle.normalized;
+        AssignPowerUp();
+        rb.velocity = direction * speed;
     }
     
     void AssignPowerUp()
@@ -62,5 +70,14 @@ public class NormalBall : MonoBehaviour
     public void ReturnToPool()
     {
         NormalBallPool.ReturnObject(gameObject);
+    }
+    
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Wall"))
+        {
+            Vector2 normal = (transform.position - other.transform.position).normalized;
+            rb.velocity = Vector2.Reflect(rb.velocity, normal);
+        }
     }
 }

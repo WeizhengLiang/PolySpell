@@ -7,54 +7,6 @@ public class EvilBall : MonoBehaviour
     public Transform player;  // Reference to the player
     public GameObject Shield;
     public ScoringSystem ScoringSystem;
-    
-    private Rigidbody2D rb;
-    private float baseSpeed = 2f;
-
-    private void Update()
-    {
-        // Move towards the player
-        MoveTowardsPlayer();
-        HandleShield();
-    }
-    
-    void MoveTowardsPlayer()
-    {
-        Vector2 direction = (player.position - transform.position).normalized;
-        transform.Translate(direction * baseSpeed * Time.deltaTime);
-    }
-
-    void HandleShield()
-    {
-        if (hasShield)
-        {
-            return;
-        }
-        
-        shieldTimer += Time.deltaTime;
-        if (shieldTimer >= shieldCooldown)
-        {
-            GainShield();
-            shieldTimer = 0f;
-        }
-    }
-    
-    void GainShield()
-    {
-        hasShield = true;
-        // Add visual indicator for shield (optional)
-        Shield.SetActive(hasShield);
-        Debug.Log("Shield activated");
-    }
-    
-    public void BreakShield()
-    {
-        hasShield = false;
-        Shield.SetActive(hasShield);
-        Debug.Log("Shield broken");
-        
-    }
-    
     [FormerlySerializedAs("minHealth")] public int minHealthRandom = 200;
     [FormerlySerializedAs("maxHealth")] public int maxHealthRandom = 500;
     public ObjectPool EvilBallPool;
@@ -62,6 +14,8 @@ public class EvilBall : MonoBehaviour
     public TextMeshProUGUI healthText;
     public int healthGainAmount = 10;  // Amount of health gained by killing a normal ball
 
+    private Rigidbody2D rb;
+    private float baseSpeed = 2f;
     private int maxHealth;
     private bool hasShield = false;  // Shield status
     private float shieldCooldown = 10f;  // Cooldown for gaining shield
@@ -69,9 +23,26 @@ public class EvilBall : MonoBehaviour
 
     void Start()
     {
-        UpdateHealthText();
         ScoringSystem = FindObjectOfType<ScoringSystem>();
         rb = GetComponent<Rigidbody2D>();
+    }
+    
+    private void Update()
+    {
+        // Move towards the player
+        MoveTowardsPlayer();
+        HandleShield();
+    }
+
+    public void Initialize()
+    {
+        UpdateHealthText();
+    }
+    
+    void MoveTowardsPlayer()
+    {
+        Vector2 direction = (player.position - transform.position).normalized;
+        transform.Translate(direction * baseSpeed * Time.deltaTime);
     }
 
     public void TakeDamage(int damage)
@@ -111,6 +82,37 @@ public class EvilBall : MonoBehaviour
     {
         health += amount;
         UpdateHealthText();
+    }
+    
+    void HandleShield()
+    {
+        if (hasShield)
+        {
+            return;
+        }
+        
+        shieldTimer += Time.deltaTime;
+        if (shieldTimer >= shieldCooldown)
+        {
+            GainShield();
+            shieldTimer = 0f;
+        }
+    }
+    
+    void GainShield()
+    {
+        hasShield = true;
+        // Add visual indicator for shield (optional)
+        Shield.SetActive(hasShield);
+        Debug.Log("Shield activated");
+    }
+    
+    public void BreakShield()
+    {
+        hasShield = false;
+        Shield.SetActive(hasShield);
+        Debug.Log("Shield broken");
+        
     }
     
     private void OnTriggerEnter2D(Collider2D col)

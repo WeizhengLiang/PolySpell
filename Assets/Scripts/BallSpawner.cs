@@ -49,6 +49,7 @@ public class BallSpawner : MonoBehaviour
     {
         GameObject ball = normalBallPool.GetObject();
         ball.transform.position = spawnPosition;
+        ball.GetComponent<NormalBall>().Initialize();
     }
     
     public void SpawnEvilBalls(int count)
@@ -70,5 +71,7 @@ public class BallSpawner : MonoBehaviour
         {
             evilBall.player = playerTransform;  // Set the player reference
         }
+        
+        evilBall.Initialize();
     }
 }
