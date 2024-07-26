@@ -9,6 +9,7 @@ public class PlayerController : MonoBehaviour
     public EnergySystem EnergySystem;
     public HealthSystem HealthSystem;
     public ScoringSystem ScoringSystem;
+    public SlowMotionManager SlowMotionManager;
     public List<Vector2> segmentStartPositions = new List<Vector2>();
     public List<Vector2> segmentEndPositions = new List<Vector2>();
     public float polygonEnergy;  // Energy used to form the polygon (calculated dynamically)
@@ -56,7 +57,7 @@ public class PlayerController : MonoBehaviour
         if (Input.GetMouseButtonDown(0) && GameManager.gameUI.activeSelf)
         {
             // Slow down time for aiming
-            Time.timeScale = 0.05f;
+            SlowMotionManager.EnterSlowMotion();
             Arrow.SetupAndActivate(transform);
         }
 
@@ -74,7 +75,7 @@ public class PlayerController : MonoBehaviour
             }
             
             // When mouse button is released, Bob changes direction
-            Time.timeScale = 1.0f;  // Return to normal time
+            SlowMotionManager.ExitSlowMotion();  // Return to normal time
 
             // Clear existing force
             rb.velocity = Vector2.zero;
