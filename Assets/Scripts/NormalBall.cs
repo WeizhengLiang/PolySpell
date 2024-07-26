@@ -18,8 +18,6 @@ public class NormalBall : MonoBehaviour
     private Vector2 direction;
     void Start()
     {
-        rb = GetComponent<Rigidbody2D>();
-        spriteRenderer = GetComponent<SpriteRenderer>();
         Initialize();
     }
 
@@ -31,6 +29,8 @@ public class NormalBall : MonoBehaviour
 
     public void Initialize()
     {
+        rb = GetComponent<Rigidbody2D>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
         direction = Random.insideUnitCircle.normalized;
         AssignPowerUp();
         rb.velocity = direction * speed;

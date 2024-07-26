@@ -56,7 +56,7 @@ public class PlayerController : MonoBehaviour
         if (Input.GetMouseButtonDown(0) && GameManager.gameUI.activeSelf)
         {
             // Slow down time for aiming
-            Time.timeScale = 0.2f;
+            Time.timeScale = 0.05f;
             Arrow.SetupAndActivate(transform);
         }
 

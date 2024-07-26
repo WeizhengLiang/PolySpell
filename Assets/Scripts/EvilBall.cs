@@ -23,8 +23,7 @@ public class EvilBall : MonoBehaviour
 
     void Start()
     {
-        ScoringSystem = FindObjectOfType<ScoringSystem>();
-        rb = GetComponent<Rigidbody2D>();
+        Initialize();
     }
     
     private void Update()
@@ -36,6 +35,8 @@ public class EvilBall : MonoBehaviour
 
     public void Initialize()
     {
+        ScoringSystem = FindObjectOfType<ScoringSystem>();
+        rb = GetComponent<Rigidbody2D>();
         UpdateHealthText();
     }
     
