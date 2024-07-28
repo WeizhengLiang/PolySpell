@@ -10,13 +10,13 @@ public class EvilBall : MonoBehaviour
     [FormerlySerializedAs("minHealth")] public int minHealthRandom = 200;
     [FormerlySerializedAs("maxHealth")] public int maxHealthRandom = 500;
     public ObjectPool EvilBallPool;
-    public int health = 100;
+    public float health = 100f;
     public TextMeshProUGUI healthText;
-    public int healthGainAmount = 10;  // Amount of health gained by killing a normal ball
+    public float healthGainAmount = 10f;  // Amount of health gained by killing a normal ball
 
     private Rigidbody2D rb;
     private float baseSpeed = 2f;
-    private int maxHealth;
+    private float maxHealth;
     private bool hasShield = false;  // Shield status
     private float shieldCooldown = 10f;  // Cooldown for gaining shield
     private float shieldTimer = 0f;  // Timer for shield activation
@@ -38,6 +38,7 @@ public class EvilBall : MonoBehaviour
         ScoringSystem = FindObjectOfType<ScoringSystem>();
         rb = GetComponent<Rigidbody2D>();
         UpdateHealthText();
+        UpdateSize();
     }
     
     void MoveTowardsPlayer()
@@ -59,8 +60,12 @@ public class EvilBall : MonoBehaviour
         UpdateHealthText();
         if (health <= 0)
         {
-            ScoringSystem.AddScore(maxHealth / 10);
+            ScoringSystem.AddScore(Mathf.CeilToInt(maxHealth / 10));
             ReturnToPool();
+        }
+        else
+        {
+            UpdateSize();
         }
     }
     
@@ -79,7 +84,7 @@ public class EvilBall : MonoBehaviour
         }
     }
     
-    public void GainHealth(int amount)
+    public void GainHealth(float amount)
     {
         health += amount;
         UpdateHealthText();
@@ -116,6 +121,18 @@ public class EvilBall : MonoBehaviour
         
     }
     
+    public void Heal(float amount)
+    {
+        health = Mathf.Min(health + amount, maxHealth);
+        UpdateSize();
+    }
+
+    void UpdateSize()
+    {
+        float scale = Mathf.Lerp(0.5f, 1.3f, health / maxHealth);  // Adjust the size range as needed
+        transform.localScale = new Vector3(scale, scale, 1f);
+    }
+    
     private void OnTriggerEnter2D(Collider2D col)
     {
         if (col.gameObject.CompareTag("NormalBall"))
@@ -124,7 +141,7 @@ public class EvilBall : MonoBehaviour
 
             if (normalBall.powerUp == NormalBall.PowerUpType.Size)
             {
-                transform.localScale *= 1.5f;  // Evil ball grows in size
+                Heal(200f);  // Heal more for size power-up
             }
             else if (normalBall.powerUp == NormalBall.PowerUpType.Speed)
             {
