@@ -39,6 +39,7 @@ public class EvilBall : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         UpdateHealthText();
         UpdateSize();
+        Shield.SetActive(hasShield);
     }
     
     void MoveTowardsPlayer()
@@ -52,11 +53,11 @@ public class EvilBall : MonoBehaviour
         if (hasShield)
         {
             hasShield = false;
-            Debug.Log("Shield absorbed damage");
+            Debug.LogWarning("Shield absorbed damage");
             return;  // Absorb the damage
         }
         health -= damage;
-        Debug.Log($"EvilBall takes {damage} damage");
+        Debug.LogWarning($"EvilBall takes {damage} damage");
         UpdateHealthText();
         if (health <= 0)
         {
@@ -92,11 +93,6 @@ public class EvilBall : MonoBehaviour
     
     void HandleShield()
     {
-        if (hasShield)
-        {
-            return;
-        }
-        
         shieldTimer += Time.deltaTime;
         if (shieldTimer >= shieldCooldown)
         {
@@ -107,17 +103,20 @@ public class EvilBall : MonoBehaviour
     
     void GainShield()
     {
+        if(hasShield) return;
         hasShield = true;
         // Add visual indicator for shield (optional)
         Shield.SetActive(hasShield);
-        Debug.Log("Shield activated");
+        Debug.LogWarning("Shield activated");
     }
     
     public void BreakShield()
     {
+        if(!hasShield) return;
+        
         hasShield = false;
         Shield.SetActive(hasShield);
-        Debug.Log("Shield broken");
+        Debug.LogWarning("Shield broken");
         
     }
     
