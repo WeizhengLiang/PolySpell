@@ -1,5 +1,8 @@
+using System;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 public class GameManager : MonoBehaviour
 {
@@ -12,6 +15,16 @@ public class GameManager : MonoBehaviour
     public TextMeshProUGUI finalScoreText;
     public TextMeshProUGUI timerText;  // Reference to the timer text UI element
     public float gameDuration = 60f;
+    
+    //MAIN MENU CANVAS
+    public Button StartBtn;
+    
+    //IN-GAME CANVAS
+    
+    //END MENU CANVAS
+    public Button HomeBtn;
+    public Button ReplayBtn;
+    public Button NextLevelBtn;
 
     [HideInInspector]
     public bool isGameRunning = false;
@@ -22,15 +35,27 @@ public class GameManager : MonoBehaviour
     private int spawnCount = 3;
     private int spawnedCount = 0;
 
+    void Awake()
+    {
+        StartBtn.onClick.AddListener(OnClickStart);
+        HomeBtn.onClick.AddListener(OnClickHome);
+        ReplayBtn.onClick.AddListener(OnClickReplay);
+        NextLevelBtn.onClick.AddListener(OnClickNextLevel);
+    }
+
     void Start()
     {
-        ShowMainMenu();
         playerController.HealthSystem.onHealthZero += EndGame;  // Subscribe to the health zero event
+        ShowMainMenu();
     }
     
     void OnDestroy()
     {
         playerController.HealthSystem.onHealthZero -= EndGame;  // Unsubscribe from the health zero event
+        StartBtn.onClick.RemoveListener(OnClickStart);
+        HomeBtn.onClick.RemoveListener(OnClickHome);
+        ReplayBtn.onClick.RemoveListener(OnClickReplay);
+        NextLevelBtn.onClick.RemoveListener(OnClickNextLevel);
     }
 
     void Update()
@@ -73,13 +98,12 @@ public class GameManager : MonoBehaviour
 
     public void StartGame()
     {
+        ResetGameData();
         gameTimer = gameDuration;
         isGameRunning = true;
         mainMenu.SetActive(false);
         gameUI.SetActive(true);
         endScreen.SetActive(false);
-        ScoringSystem.ResetScore();  // Reset score at the start of the game
-        UpdateTimerText();  // Initialize the timer text
         InitializeSpawnIntervals();  // Initialize spawn intervals for the game
         BallSpawner.SpawnInitialBalls(playerController.initialSpawnCount, 3);
     }
@@ -87,7 +111,7 @@ public class GameManager : MonoBehaviour
     public void EndGame()
     {
         isGameRunning = false;
-        finalScoreText.text = "Final Score: " + ScoringSystem.GetFinalScore();
+        finalScoreText.text = ScoringSystem.GetFinalScore().ToString();
         gameUI.SetActive(false);
         endScreen.SetActive(true);
     }
@@ -103,9 +127,15 @@ public class GameManager : MonoBehaviour
         mainMenu.SetActive(true);
         gameUI.SetActive(false);
         endScreen.SetActive(false);
+        ResetGameData();
+    }
+
+    private void ResetGameData()
+    {
         ScoringSystem.ResetScore();  // Reset score on returning to main menu
         playerController.ResetPlayer();  // Reset player state if necessary
         ResetObjectPools();
+        UpdateTimerText(); 
     }
     
     private void ResetObjectPools()
@@ -123,4 +153,25 @@ public class GameManager : MonoBehaviour
             playerController.evilBallPool.ReturnObject(ball);
         }
     }
+
+    private void OnClickStart()
+    {
+        StartGame();
+    }
+
+    private void OnClickHome()
+    {
+        ReturnToMainMenu();
+    }
+
+    private void OnClickReplay()
+    {
+        StartGame();
+    }
+    
+    private void OnClickNextLevel()
+    {
+        
+    }
+    
 }
