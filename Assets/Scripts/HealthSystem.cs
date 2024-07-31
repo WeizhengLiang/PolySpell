@@ -6,7 +6,7 @@ public class HealthSystem : MonoBehaviour
     public delegate void OnHealthZero();
     public event OnHealthZero onHealthZero;
     
-    public Slider healthBar;
+    public Image healthCircle;
     public float maxHealth = 100f;
     private float currentHealth;
 
@@ -31,7 +31,7 @@ public class HealthSystem : MonoBehaviour
 
     private void UpdateHealthBar()
     {
-        healthBar.value = currentHealth / maxHealth;
+        healthCircle.fillAmount = currentHealth / maxHealth;
     }
     
     public void ResetHealth()
