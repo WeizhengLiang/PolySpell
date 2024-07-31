@@ -39,7 +39,7 @@ public class NormalBall : MonoBehaviour
     void AssignPowerUp()
     {
         float chance = Random.Range(0f, 1f);
-        if (chance < 0.2f)  // 20% chance to be a power-up ball
+        if (chance < 0.1f)  // 20% chance to be a power-up ball
         {
             powerUp = (PowerUpType)Random.Range(1, 3);
             switch (powerUp)
