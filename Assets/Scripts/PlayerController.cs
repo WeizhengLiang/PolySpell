@@ -278,14 +278,14 @@ public class PlayerController : MonoBehaviour
 
             if (normalBall.powerUp == NormalBall.PowerUpType.Size)
             {
-                var scale = transform.localScale * 0.5f;
-                if (scale.x >= 0.1f)
+                var scale = transform.localScale - new Vector3(0.1f, 0.1f, 0f);
+                if (scale.x >= 0.5f)
                 {
                     transform.localScale = scale;  // Bob shrinks in size
                 }
                 else
                 {
-                    transform.localScale = new Vector3(0.1f, 0.1f, 1f);
+                    transform.localScale = new Vector3(0.5f, 0.5f, 1f);
                 }
                 _trailRenderer.startWidth = transform.localScale.x;
 
