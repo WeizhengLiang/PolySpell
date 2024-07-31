@@ -53,11 +53,11 @@ public class EvilBall : MonoBehaviour
         if (hasShield)
         {
             hasShield = false;
-            Debug.LogWarning("Shield absorbed damage");
+            Debug.Log("Shield absorbed damage");
             return;  // Absorb the damage
         }
         health -= damage;
-        Debug.LogWarning($"EvilBall takes {damage} damage");
+        Debug.Log($"EvilBall takes {damage} damage");
         UpdateHealthText();
         if (health <= 0)
         {
@@ -93,6 +93,12 @@ public class EvilBall : MonoBehaviour
     
     void HandleShield()
     {
+        if (hasShield)
+        {
+            shieldTimer = 0f;
+            return;
+        }
+        
         shieldTimer += Time.deltaTime;
         if (shieldTimer >= shieldCooldown)
         {
@@ -107,7 +113,7 @@ public class EvilBall : MonoBehaviour
         hasShield = true;
         // Add visual indicator for shield (optional)
         Shield.SetActive(hasShield);
-        Debug.LogWarning("Shield activated");
+        Debug.Log("Shield activated");
     }
     
     public void BreakShield()
@@ -116,7 +122,7 @@ public class EvilBall : MonoBehaviour
         
         hasShield = false;
         Shield.SetActive(hasShield);
-        Debug.LogWarning("Shield broken");
+        Debug.Log("Shield broken");
         
     }
     
