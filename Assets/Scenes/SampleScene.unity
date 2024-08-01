@@ -4170,12 +4170,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6849fdd69834b4a89bd47127b4d899f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hitEffectPrefab: {fileID: 2504214343621411470, guid: 3ed0d324122d7b24eaec75c55c74aafc, type: 3}
-  killEffectPrefab: {fileID: 8771972552311404799, guid: bbf9e36a48d6c5648a13889afab076fd, type: 3}
+  hitEffectPrefab: {fileID: 2504214343621411470, guid: 9a641814c8dbb423a92353a219165d2e, type: 3}
+  killEffectPrefab: {fileID: 8771972552311404799, guid: 3578221dad4074dd2975fb41c483caab, type: 3}
   killEffectPurplePrefab: {fileID: 8771972552311404799, guid: 3d6959b71dd2a4b96bbae11d9cc19526, type: 3}
   killEffectBluePrefab: {fileID: 8771972552311404799, guid: 0b46d51395bdc4667bf27c520aed98bc, type: 3}
   killEffectYellowPrefab: {fileID: 8771972552311404799, guid: 4ffbb85b910be4113a9643f5cded52b7, type: 3}
-  shieldBreakingEffectPrefab: {fileID: 2708598583397607911, guid: 6398d43fe79ea0140913dc5530c646af, type: 3}
+  shieldBreakingEffectPrefab: {fileID: 2708598583397607911, guid: 784c9fb3edfa448bbb416fc29ac3c932, type: 3}
   BlueSpawningEffectPrefab: {fileID: 5824670795371433373, guid: e78a4389752344c33ac3da783c248ad8, type: 3}
   YelloSpawningEffectPrefab: {fileID: 5824670795371433373, guid: 5ef7628bd4f7d4b989f73f37169f9a9d, type: 3}
   PurpleSpawningEffectPrefab: {fileID: 5824670795371433373, guid: 89e66101f46654ceaae40efffe758427, type: 3}
