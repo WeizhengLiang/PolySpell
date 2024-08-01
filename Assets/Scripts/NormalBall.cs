@@ -29,10 +29,10 @@ public class NormalBall : MonoBehaviour
 
     public void Initialize()
     {
+        AssignPowerUp();
         rb = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         direction = Random.insideUnitCircle.normalized;
-        AssignPowerUp();
         rb.velocity = direction * speed;
     }
     
@@ -42,23 +42,10 @@ public class NormalBall : MonoBehaviour
         if (chance < 0.1f)  // 20% chance to be a power-up ball
         {
             powerUp = (PowerUpType)Random.Range(1, 3);
-            switch (powerUp)
-            {
-                case PowerUpType.Size:
-                    spriteRenderer.color = Color.yellow;  // Indicate size power-up with yellow color
-                    Text.text = "Size";
-                    break;
-                case PowerUpType.Speed:
-                    spriteRenderer.color = Color.magenta;  // Indicate speed power-up with blue color
-                    Text.text = "Speed";
-                    break;
-            }
         }
         else
         {
             powerUp = PowerUpType.None;
-            spriteRenderer.color = Color.blue;  // Normal ball color
-            Text.text = "Normal";
         }
     }
 
@@ -78,6 +65,38 @@ public class NormalBall : MonoBehaviour
         {
             Vector2 normal = (transform.position - other.transform.position).normalized;
             rb.velocity = Vector2.Reflect(rb.velocity, normal);
+        }
+    }
+
+    public void TriggerDieVFX(Vector2 pos)
+    {
+        switch (powerUp)
+        {
+            case PowerUpType.Size:
+                VFXManager.Instance.SpawnVFXWithFadeOut(VFXManager.Instance.killEffectYellowPrefab, pos, 1f);
+                break;
+            case PowerUpType.Speed:
+                VFXManager.Instance.SpawnVFXWithFadeOut(VFXManager.Instance.killEffectPurplePrefab, pos, 1f);
+                break;
+            case PowerUpType.None:
+                VFXManager.Instance.SpawnVFXWithFadeOut(VFXManager.Instance.killEffectBluePrefab, pos, 1f);
+                break;
+        }
+    }
+    
+    public void TriggerSpawnVFX(Vector2 pos)
+    {
+        switch (powerUp)
+        {
+            case PowerUpType.Size:
+                VFXManager.Instance.SpawnVFXWithFadeOut(VFXManager.Instance.YelloSpawningEffectPrefab, pos, 1f);
+                break;
+            case PowerUpType.Speed:
+                VFXManager.Instance.SpawnVFXWithFadeOut(VFXManager.Instance.PurpleSpawningEffectPrefab, pos, 1f);
+                break;
+            case PowerUpType.None:
+                VFXManager.Instance.SpawnVFXWithFadeOut(VFXManager.Instance.BlueSpawningEffectPrefab, pos, 1f);
+                break;
         }
     }
 }

@@ -298,10 +298,14 @@ public class PlayerController : MonoBehaviour
                 // DisplayNotification("Speed Up!", Color.blue);
             }
             
+            normalBall.TriggerDieVFX(col.transform.position);
+            
             normalBallPool.ReturnObject(col.gameObject);// Remove the normal ball
             EnergySystem.GainEnergy(EnergySystem.energyGainAmount);
             ScoringSystem.AddScore(1);  // Add score for killing normal ball
             // DisplayNotification("+1", Color.blue);
+            
+            
         }
     }
 
@@ -322,6 +326,9 @@ public class PlayerController : MonoBehaviour
         
         if (col.gameObject.CompareTag("EvilBall"))
         {
+            Vector2 contactPoint = col.contacts[0].point;
+            VFXManager.Instance.SpawnVFX(VFXManager.Instance.hitEffectPrefab, contactPoint);
+            
             Vector2 bounceDirection = (transform.position - col.transform.position).normalized;
             rb.velocity = bounceDirection * bounceForce;
             HealthSystem.TakeDamage(10f);  // Adjust damage value as necessary

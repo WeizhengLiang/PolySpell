@@ -18,7 +18,7 @@ public class BallSpawner : MonoBehaviour
 
     public IEnumerator SpawnNormalBallWithAnimation(Vector2 position)
     {
-        GameObject sparkle = Instantiate(normalBallSparklePrefab, position, Quaternion.identity);
+        GameObject sparkle = VFXManager.Instance.SpawnVFX(VFXManager.Instance.PurpleSpawningEffectPrefab, position);
         yield return new WaitForSeconds(1.5f);  // Duration of the sparkle animation
 
         Destroy(sparkle);

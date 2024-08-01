@@ -120,6 +120,7 @@ public class EvilBall : MonoBehaviour
     {
         if(!hasShield) return;
         
+        VFXManager.Instance.SpawnVFXWithFadeOut(VFXManager.Instance.shieldBreakingEffectPrefab, transform.position);
         hasShield = false;
         Shield.SetActive(hasShield);
         Debug.Log("Shield broken");
