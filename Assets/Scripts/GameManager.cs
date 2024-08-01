@@ -67,7 +67,7 @@ public class GameManager : MonoBehaviour
             {
                 EndGame();
             }
-            UpdateTimerText();
+            UpdateTimerUI();
             HandleSpawning();
         }
     }
@@ -91,9 +91,9 @@ public class GameManager : MonoBehaviour
         }
     }
     
-    void UpdateTimerText()
+    void UpdateTimerUI()
     {
-        timerText.text = "Time: " + Mathf.Ceil(gameTimer).ToString();
+        timerText.text = Mathf.Ceil(gameTimer).ToString();
     }
 
     public void StartGame()
@@ -135,7 +135,7 @@ public class GameManager : MonoBehaviour
         ScoringSystem.ResetScore();  // Reset score on returning to main menu
         playerController.ResetPlayer();  // Reset player state if necessary
         ResetObjectPools();
-        UpdateTimerText(); 
+        UpdateTimerUI(); 
     }
     
     private void ResetObjectPools()

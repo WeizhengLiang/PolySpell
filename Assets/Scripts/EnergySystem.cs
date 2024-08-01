@@ -4,6 +4,7 @@ using UnityEngine.UI;
 
 public class EnergySystem : MonoBehaviour
 {
+    public Slider energyBar;
     public Image energyCircle;
     public GameObject normalBallPrefab;  // Reference to the normal ball prefab
     public TrailRenderer trailRenderer;  // Reference to the trail renderer
@@ -59,6 +60,7 @@ public class EnergySystem : MonoBehaviour
     private void UpdateEnergyBar()
     {
         energyCircle.fillAmount = currentEnergy / maxEnergy;
+        energyBar.value = currentEnergy / maxEnergy;
     }
 
     private void ClearTrailAndSpawnBalls()

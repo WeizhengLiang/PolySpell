@@ -20,7 +20,7 @@ public class ScoringSystem : MonoBehaviour
 
     private void UpdateScoreText()
     {
-        scoreText.text = "Score: " + currentScore.ToString();
+        scoreText.text = $"{currentScore} <size=42><color=#9399a3>/ 96</size></color>";
     }
     
     public int GetFinalScore()
