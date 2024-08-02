@@ -52,7 +52,6 @@ public class EvilBall : MonoBehaviour
     {
         if (hasShield)
         {
-            hasShield = false;
             Debug.Log("Shield absorbed damage");
             return;  // Absorb the damage
         }
@@ -118,7 +117,11 @@ public class EvilBall : MonoBehaviour
     
     public void BreakShield()
     {
-        if(!hasShield) return;
+        if (!hasShield)
+        {
+            Debug.Log("no shield can be break");
+            return;
+        }
         
         VFXManager.Instance.SpawnVFXWithFadeOut(VFXManager.Instance.shieldBreakingEffectPrefab, transform.position);
         hasShield = false;
