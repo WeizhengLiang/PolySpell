@@ -54,14 +54,16 @@ public class PlayerController : MonoBehaviour
     {
         Vector2 currentPosition = transform.position;
 
-        if (Input.GetMouseButtonDown(0) && GameManager.gameUI.activeSelf)
+        if (Input.GetMouseButtonDown(0) && GameManager.gameUI.activeSelf && !SlowMotionManager.inSlowMotion)
         {
             // Slow down time for aiming
             SlowMotionManager.EnterSlowMotion();
             Arrow.SetupAndActivate(transform);
         }
-
-        if (Input.GetMouseButtonUp(0) && GameManager.gameUI.activeSelf)
+        
+        // todo: add cancel aiming action
+        
+        if (Input.GetMouseButtonUp(0) && GameManager.gameUI.activeSelf && SlowMotionManager.inSlowMotion)
         {
             Arrow.Deactivate();
             if (!EnergySystem.IsEnergyEmpty)
