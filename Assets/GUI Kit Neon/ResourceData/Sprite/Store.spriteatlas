@@ -28,31 +28,11 @@ SpriteAtlas:
       allowAlphaSplitting: 0
       enableRotation: 1
       enableTightPacking: 0
-      enableAlphaDilation: 0
-    secondaryTextureSettings: {}
     variantMultiplier: 1
     packables:
     - {fileID: 102900000, guid: 1fdccf17c5f2b4432bb59d58ce246439, type: 3}
+    totalSpriteSurfaceArea: 304168
     bindAsDefault: 1
-    isAtlasV2: 0
-    cachedData: {fileID: 0}
-    packedSpriteRenderDataKeys:
-    - c110b9c1ab267450dacb0d4b338cb0f6: 21300000
-    - bc60ad62f7c9346a2bf348e893e21030: 21300000
-    - 6369aa92ee7bb498c8ab6f7738c6fa8f: 21300000
-    - 395b04f6309534138b878df03ff019a9: 21300000
-    - 0b0cede7298084f82a86f48473e87321: 21300000
-    - 9070fb08af3ed4d3ca0830ab1bd7f90c: 21300000
-    - 783c1d38f220440398dcc7886737a18c: 21300000
-    - 798d95b9521544ae6944bf5aeb9fcefc: 21300000
-    - 7caec3c9d727947bb9f74e006965332d: 21300000
-    - c2786ebaa1a1247d9aafd974f49558fd: 21300000
-    - f951a96c1a8fe47ddaa2a22f61d46923: 21300000
-    - 3d1b5dac0b60f429889be405a1fa4721: 21300000
-    - 11a7d2edf4bac43bc8dda2dfb614f712: 21300000
-    - 40e9d9ae114334231ac9302390b17825: 21300000
-    - bb14d6fe3346f442aa65e3a999516def: 21300000
-    - e89c234ff48a840cc865a0a1726e338d: 21300000
   m_MasterAtlas: {fileID: 0}
   m_PackedSprites:
   - {fileID: 21300000, guid: c110b9c1ab267450dacb0d4b338cb0f6, type: 3}
@@ -88,6 +68,5 @@ SpriteAtlas:
   - List_bg_frame
   - coin_img_03
   - store_gem
-  m_RenderDataMap: {}
   m_Tag: Store
   m_IsVariant: 0
