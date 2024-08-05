@@ -3021,6 +3021,7 @@ GameObject:
   m_Component:
   - component: {fileID: 538582906}
   - component: {fileID: 538582905}
+  - component: {fileID: 538582907}
   m_Layer: 0
   m_Name: leftWall
   m_TagString: Wall
@@ -3088,6 +3089,33 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1530856306}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!50 &538582907
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 538582904}
+  m_BodyType: 2
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
 --- !u!1 &562150434
 GameObject:
   m_ObjectHideFlags: 0
@@ -6005,7 +6033,6 @@ MonoBehaviour:
   segmentStartPositions: []
   segmentEndPositions: []
   polygonEnergy: 50
-  normalBallPrefab: {fileID: 1420938342263586036, guid: cfcd2f8dcea4a48e19a8c6915fdaf3f8, type: 3}
   initialSpawnCount: 10
   normalBallPool: {fileID: 1421904943}
   evilBallPool: {fileID: 992304165}
@@ -6521,6 +6548,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1084734175}
   - component: {fileID: 1084734174}
+  - component: {fileID: 1084734176}
   m_Layer: 0
   m_Name: botWall
   m_TagString: Wall
@@ -6588,6 +6616,33 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1530856306}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!50 &1084734176
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1084734173}
+  m_BodyType: 2
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
 --- !u!1 &1101984001
 GameObject:
   m_ObjectHideFlags: 0
@@ -6996,6 +7051,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1224430084}
   - component: {fileID: 1224430083}
+  - component: {fileID: 1224430085}
   m_Layer: 0
   m_Name: rightWall
   m_TagString: Wall
@@ -7063,6 +7119,33 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1530856306}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!50 &1224430085
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1224430082}
+  m_BodyType: 2
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
 --- !u!1 &1240480100
 GameObject:
   m_ObjectHideFlags: 0
@@ -7117,6 +7200,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1283656177}
   - component: {fileID: 1283656176}
+  - component: {fileID: 1283656178}
   m_Layer: 0
   m_Name: topWall
   m_TagString: Wall
@@ -7184,6 +7268,33 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1530856306}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!50 &1283656178
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1283656175}
+  m_BodyType: 2
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
 --- !u!1 &1292401195
 GameObject:
   m_ObjectHideFlags: 0

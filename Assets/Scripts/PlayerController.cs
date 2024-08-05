@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using Kalkatos.DottedArrow;
+using Unity.Mathematics;
 using Random = UnityEngine.Random;
 
 public class PlayerController : MonoBehaviour
@@ -13,7 +14,6 @@ public class PlayerController : MonoBehaviour
     public List<Vector2> segmentStartPositions = new List<Vector2>();
     public List<Vector2> segmentEndPositions = new List<Vector2>();
     public float polygonEnergy;  // Energy used to form the polygon (calculated dynamically)
-    public GameObject normalBallPrefab;  // Reference to the normal ball prefab
     public int initialSpawnCount = 10;  // Number of normal balls to spawn at the start
     public ObjectPool normalBallPool;  // Reference to the Object Pool for normal balls
     public ObjectPool evilBallPool;  // Reference to the Object Pool for evil balls
@@ -34,9 +34,6 @@ public class PlayerController : MonoBehaviour
     private Vector2 currentDirection;
     private Dictionary<Vector2, (float, int)> intersectionResults = new ();
     private bool isNewPoly;
-    
-    private List<GameObject> normalBalls = new List<GameObject>();  // List to manage normal balls
-    private List<GameObject> evilBalls = new List<GameObject>();  // List to manage evil balls
 
     private void Awake()
     {
@@ -183,7 +180,6 @@ public class PlayerController : MonoBehaviour
                 int polygonType = DeterminePolygonType(i);
                 intersectionResults[intersection] = (distance, polygonType);
                 Debug.Log("Potential polygon: " + GetPolygonType(polygonType));
-
             }
         }
     }
@@ -221,7 +217,6 @@ public class PlayerController : MonoBehaviour
     {
         segmentStartPositions.Add(start);
         segmentEndPositions.Add(end);
-
         // Remove the oldest segment if the number of segments exceeds 5
         // if (segmentStartPositions.Count > 5)
         // {
@@ -313,6 +308,10 @@ public class PlayerController : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D col)
     {
+        var normal = col.contacts[0].normal;
+        var reflection = currentDirection - 2 * Vector2.Dot(currentDirection, normal) * normal;
+        currentDirection = reflection;
+        
         if (isMoving)
         {
             Vector2 currentPosition = transform.position;
@@ -330,12 +329,11 @@ public class PlayerController : MonoBehaviour
         {
             Vector2 contactPoint = col.contacts[0].point;
             VFXManager.Instance.SpawnVFX(VFXManager.Instance.hitEffectPrefab, contactPoint);
-            
-            Vector2 bounceDirection = (transform.position - col.transform.position).normalized;
-            rb.velocity = bounceDirection * bounceForce;
             HealthSystem.TakeDamage(10f);  // Adjust damage value as necessary
             // DisplayNotification("-10", Color.red);
         }
+        
+        rb.velocity = currentDirection * bounceForce;
     }
     
     void ShowPolygon(Vector2 intersectionPoint, int polygonEdgesCount) // New method to show polygon visual
