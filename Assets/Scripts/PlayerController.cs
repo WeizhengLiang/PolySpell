@@ -258,6 +258,7 @@ public class PlayerController : MonoBehaviour
 
             if (normalBall.powerUp == NormalBall.PowerUpType.Size)
             {
+                VFXManager.Instance.SpawnVFX(VFXManager.Instance.SizeDownEffectPrefab, transform.position);
                 var scale = transform.localScale - new Vector3(0.1f, 0.1f, 0f);
                 if (scale.x >= 0.5f)
                 {
@@ -273,6 +274,7 @@ public class PlayerController : MonoBehaviour
             }
             else if (normalBall.powerUp == NormalBall.PowerUpType.Speed)
             {
+                VFXManager.Instance.SpawnVFX(VFXManager.Instance.SpeedUpEffectPrefab, transform.position);
                 // rb.velocity *= 1.5f;  // Bob gains speed
                 shootForce *= 1.1f;
                 // DisplayNotification("Speed Up!", Color.blue);

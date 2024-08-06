@@ -16,6 +16,8 @@ public class VFXManager : MonoBehaviour
     public GameObject PurpleSpawningEffectPrefab;
     public GameObject RedSpawningEffectPrefab;
     public GameObject EvilBallDieEffectPrefab;
+    public GameObject SpeedUpEffectPrefab;
+    public GameObject SizeDownEffectPrefab;
 
     void Awake()
     {

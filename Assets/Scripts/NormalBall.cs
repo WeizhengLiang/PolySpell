@@ -42,7 +42,8 @@ public class NormalBall : MonoBehaviour
             case PowerUpType.Speed:
                 spriteRenderer.color = Color.magenta;
                 break;
-            default:
+            case PowerUpType.None:
+                spriteRenderer.color = Color.cyan;
                 break;
         }
     }

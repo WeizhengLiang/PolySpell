@@ -4210,6 +4210,8 @@ MonoBehaviour:
   PurpleSpawningEffectPrefab: {fileID: 5824670795371433373, guid: 89e66101f46654ceaae40efffe758427, type: 3}
   RedSpawningEffectPrefab: {fileID: 5824670795371433373, guid: da4ae5644169c4ffd9075e4026d31706, type: 3}
   EvilBallDieEffectPrefab: {fileID: 141433446842962269, guid: 9fe8f8b3288e45a44af36ff8aa04486e, type: 3}
+  SpeedUpEffectPrefab: {fileID: 5339739117810204693, guid: 62d9616b2c5e1470faf101b83e1eac53, type: 3}
+  SizeDownEffectPrefab: {fileID: 5339739117810204693, guid: e00388c18dbd346e69f360655c27c3bb, type: 3}
 --- !u!1 &757620077
 GameObject:
   m_ObjectHideFlags: 0
