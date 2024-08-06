@@ -4209,6 +4209,7 @@ MonoBehaviour:
   YelloSpawningEffectPrefab: {fileID: 5824670795371433373, guid: 5ef7628bd4f7d4b989f73f37169f9a9d, type: 3}
   PurpleSpawningEffectPrefab: {fileID: 5824670795371433373, guid: 89e66101f46654ceaae40efffe758427, type: 3}
   RedSpawningEffectPrefab: {fileID: 5824670795371433373, guid: da4ae5644169c4ffd9075e4026d31706, type: 3}
+  EvilBallDieEffectPrefab: {fileID: 141433446842962269, guid: 9fe8f8b3288e45a44af36ff8aa04486e, type: 3}
 --- !u!1 &757620077
 GameObject:
   m_ObjectHideFlags: 0
@@ -5300,6 +5301,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   objectPrefab: {fileID: 3272611494729713941, guid: 7178b8e97e5034e2baf158e0408248f7, type: 3}
   initialPoolSize: 10
+  activeObjList: []
 --- !u!4 &992304166
 Transform:
   m_ObjectHideFlags: 0
@@ -6034,8 +6036,6 @@ MonoBehaviour:
   segmentEndPositions: []
   polygonEnergy: 50
   initialSpawnCount: 10
-  normalBallPool: {fileID: 1421904943}
-  evilBallPool: {fileID: 992304165}
   polygonVisualizerPrefab: {fileID: 9000707771975878887, guid: 491a965017ccb43f0a2bb028760b38e5, type: 3}
   Marker: {fileID: 4088446733292955402, guid: 67390b469d3f440349dc94d92a47edcd, type: 3}
   notificationDisplayPrefab: {fileID: 7835643980376804748, guid: 6886c945b70a64e459f388327ce616ac, type: 3}
@@ -8206,6 +8206,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   objectPrefab: {fileID: 1420938342263586036, guid: cfcd2f8dcea4a48e19a8c6915fdaf3f8, type: 3}
   initialPoolSize: 10
+  activeObjList: []
 --- !u!4 &1421904944
 Transform:
   m_ObjectHideFlags: 0

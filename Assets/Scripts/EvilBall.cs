@@ -60,6 +60,7 @@ public class EvilBall : MonoBehaviour
         UpdateHealthText();
         if (health <= 0)
         {
+            VFXManager.Instance.SpawnVFX(VFXManager.Instance.EvilBallDieEffectPrefab, transform.position);
             ScoringSystem.AddScore(Mathf.CeilToInt(maxHealth / 10));
             ReturnToPool();
         }
