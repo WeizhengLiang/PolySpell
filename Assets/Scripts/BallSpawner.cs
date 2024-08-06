@@ -74,4 +74,19 @@ public class BallSpawner : MonoBehaviour
         
         evilBall.Initialize();
     }
+
+    public void ResetObjectPools()
+    {
+        for (int i = normalBallPool.activeObjList.Count - 1; i >= 0; i--)
+        {
+            var ball = normalBallPool.activeObjList[i];
+            normalBallPool.ReturnObject(ball);
+        }
+
+        for (int i = evilBallPool.activeObjList.Count - 1; i >= 0; i--)
+        {
+            var ball = evilBallPool.activeObjList[i];
+            evilBallPool.ReturnObject(ball);
+        }
+    }
 }

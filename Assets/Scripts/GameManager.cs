@@ -134,24 +134,8 @@ public class GameManager : MonoBehaviour
     {
         ScoringSystem.ResetScore();  // Reset score on returning to main menu
         playerController.ResetPlayer();  // Reset player state if necessary
-        ResetObjectPools();
+        BallSpawner.ResetObjectPools();
         UpdateTimerUI(); 
-    }
-    
-    private void ResetObjectPools()
-    {
-        // Reset all object pools
-        GameObject[] normalBalls = GameObject.FindGameObjectsWithTag("NormalBall");
-        foreach (GameObject ball in normalBalls)
-        {
-            playerController.normalBallPool.ReturnObject(ball);
-        }
-
-        GameObject[] evilBalls = GameObject.FindGameObjectsWithTag("EvilBall");
-        foreach (GameObject ball in evilBalls)
-        {
-            playerController.evilBallPool.ReturnObject(ball);
-        }
     }
 
     private void OnClickStart()

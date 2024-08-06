@@ -15,8 +15,6 @@ public class PlayerController : MonoBehaviour
     public List<Vector2> segmentEndPositions = new List<Vector2>();
     public float polygonEnergy;  // Energy used to form the polygon (calculated dynamically)
     public int initialSpawnCount = 10;  // Number of normal balls to spawn at the start
-    public ObjectPool normalBallPool;  // Reference to the Object Pool for normal balls
-    public ObjectPool evilBallPool;  // Reference to the Object Pool for evil balls
     public GameObject polygonVisualizerPrefab;  // Reference to the Polygon Visualizer prefab
     public GameObject Marker;
     public GameObject notificationDisplayPrefab;  // Reference to the notification display prefab
@@ -143,21 +141,6 @@ public class PlayerController : MonoBehaviour
                 isMoving = false;
                 isNewPoly = true;
             }
-        }
-    }
-    
-    private void ResetObjectPools()
-    {
-        GameObject[] normalBalls = GameObject.FindGameObjectsWithTag("NormalBall");
-        foreach (GameObject ball in normalBalls)
-        {
-            normalBallPool.ReturnObject(ball);
-        }
-
-        GameObject[] evilBalls = GameObject.FindGameObjectsWithTag("EvilBall");
-        foreach (GameObject ball in evilBalls)
-        {
-            evilBallPool.ReturnObject(ball);
         }
     }
 
@@ -297,7 +280,7 @@ public class PlayerController : MonoBehaviour
             
             normalBall.TriggerDieVFX(col.transform.position);
             
-            normalBallPool.ReturnObject(col.gameObject);// Remove the normal ball
+            BallSpawner.normalBallPool.ReturnObject(col.gameObject);// Remove the normal ball
             EnergySystem.GainEnergy(EnergySystem.energyGainAmount);
             ScoringSystem.AddScore(1);  // Add score for killing normal ball
             // DisplayNotification("+1", Color.blue);
@@ -425,8 +408,7 @@ public class PlayerController : MonoBehaviour
     
     void BreakEvilBallsInsidePolygon()  // changed: New method to break evil ball shields
     {
-        GameObject[] evilBalls = GameObject.FindGameObjectsWithTag("EvilBall");
-        foreach (GameObject ball in evilBalls)
+        foreach (GameObject ball in BallSpawner.evilBallPool.activeObjList)
         {
             if (IsPointInPolygon(ball.transform.position))
             {
@@ -437,20 +419,20 @@ public class PlayerController : MonoBehaviour
 
     void KillBallsInsidePolygon()  // changed: updated method to handle killing balls inside polygon
     {
-        GameObject[] normalBalls = GameObject.FindGameObjectsWithTag("NormalBall");
-        foreach (GameObject ball in normalBalls)
+        for (int i = BallSpawner.normalBallPool.activeObjList.Count - 1; i >= 0; i--)
         {
+            var ball = BallSpawner.normalBallPool.activeObjList[i];
             if (IsPointInPolygon(ball.transform.position))
             {
-                normalBallPool.ReturnObject(ball);
+                BallSpawner.normalBallPool.ReturnObject(ball);
                 EnergySystem.GainEnergy(EnergySystem.energyGainAmount);
                 ScoringSystem.AddScore(1);  // Add score for killing normal ball
             }
         }
 
-        GameObject[] evilBalls = GameObject.FindGameObjectsWithTag("EvilBall");
-        foreach (GameObject ball in evilBalls)
+        for (int i = BallSpawner.evilBallPool.activeObjList.Count - 1; i >= 0; i--)
         {
+            var ball = BallSpawner.evilBallPool.activeObjList[i];
             if (IsPointInPolygon(ball.transform.position))
             {
                 ball.GetComponent<EvilBall>().TakeDamage((int)polygonEnergy);
@@ -515,6 +497,6 @@ public class PlayerController : MonoBehaviour
         EnergySystem.ResetEnergy();
         
         // Reset object pools
-        ResetObjectPools();
+        // ResetObjectPools();
     }
 }
