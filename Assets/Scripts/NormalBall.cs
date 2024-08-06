@@ -34,6 +34,17 @@ public class NormalBall : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         direction = Random.insideUnitCircle.normalized;
         rb.velocity = direction * speed;
+        switch (powerUp)
+        {
+            case PowerUpType.Size:
+                spriteRenderer.color = Color.yellow;
+                break;
+            case PowerUpType.Speed:
+                spriteRenderer.color = Color.magenta;
+                break;
+            default:
+                break;
+        }
     }
     
     void AssignPowerUp()
