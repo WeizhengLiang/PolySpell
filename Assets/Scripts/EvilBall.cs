@@ -89,6 +89,7 @@ public class EvilBall : MonoBehaviour
     {
         health += amount;
         UpdateHealthText();
+        UpdateSize();
     }
     
     void HandleShield()
@@ -130,16 +131,10 @@ public class EvilBall : MonoBehaviour
         Debug.Log("Shield broken");
         
     }
-    
-    public void Heal(float amount)
-    {
-        health = Mathf.Min(health + amount, maxHealth);
-        UpdateSize();
-    }
 
     void UpdateSize()
     {
-        float scale = Mathf.Lerp(0.5f, 1.3f, health / maxHealth);  // Adjust the size range as needed
+        float scale = Mathf.Lerp(0.5f, 2f, health / maxHealthRandom);  // Adjust the size range as needed
         transform.localScale = new Vector3(scale, scale, 1f);
     }
     
@@ -151,7 +146,7 @@ public class EvilBall : MonoBehaviour
 
             if (normalBall.powerUp == NormalBall.PowerUpType.Size)
             {
-                Heal(200f);  // Heal more for size power-up
+                GainHealth(200f);  // Heal more for size power-up
             }
             else if (normalBall.powerUp == NormalBall.PowerUpType.Speed)
             {
