@@ -1,5 +1,6 @@
 using System;
 using TMPro;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
@@ -13,6 +14,7 @@ public class GameManager : MonoBehaviour
     public GameObject gameUI;
     public GameObject endScreen;
     public GameObject pausePanel;
+    public GameObject tutorialCanvas;
     public TextMeshProUGUI finalScoreText;
     public TextMeshProUGUI timerText;  // Reference to the timer text UI element
     public float gameDuration = 60f;
@@ -31,7 +33,12 @@ public class GameManager : MonoBehaviour
     public Button pauseContinueBtn;
     public Button pauseReplayBtn;
     
+    // tutorial
+    public GameObject[] tutorialPanels;
+    
     private bool isPaused = false;
+    private bool isTutorialActive = false; 
+    private int currentTutorialPanelIndex = 0;
 
     public bool IsPaused
     {
@@ -45,7 +52,6 @@ public class GameManager : MonoBehaviour
     public bool isGameRunning = false;
     
     private float gameTimer = 0f;
-    private int score = 0;
     private float[] spawnIntervals;
     private int spawnCount = 3;
     private int spawnedCount = 0;
@@ -96,6 +102,14 @@ public class GameManager : MonoBehaviour
             }
             UpdateTimerUI();
             HandleSpawning();
+        }
+        if (isTutorialActive && Input.GetKeyDown(KeyCode.Escape))
+        {
+            SkipTutorial();  // added: Skip tutorial if player presses Esc
+        }
+        if (isTutorialActive && Input.GetMouseButtonDown(0))
+        {
+            ShowNextTutorialPanel();  // added: Advance to the next tutorial panel on left mouse click
         }
     }
     
@@ -170,7 +184,16 @@ public class GameManager : MonoBehaviour
 
     private void OnClickStart()
     {
-        StartGame();
+        // Check if it's the player's first time playing
+        if (PlayerPrefs.GetInt("FirstTimePlaying", 1) == 1)
+        {
+            ShowTutorial();  // added: Show tutorial if first time playing
+            PlayerPrefs.SetInt("FirstTimePlaying", 0);  // Update to indicate player has seen the tutorial
+        }
+        else
+        {
+            StartGame();
+        }
     }
 
     private void OnClickHome()
@@ -210,6 +233,63 @@ public class GameManager : MonoBehaviour
         Time.timeScale = originalTimeScale; // Resume original time scale
         isPaused = false;
         pausePanel.SetActive(false); // Hide pause panel
+    }
+    
+    private void ShowTutorial()  // modified: Method to show the tutorial panels
+    {
+        isTutorialActive = true;
+        tutorialCanvas.SetActive(isTutorialActive);
+        Time.timeScale = 0f;  // Pause the game while tutorial is active
+        currentTutorialPanelIndex = 0;  // Start from the first panel
+        ShowCurrentTutorialPanel();
+    }
+
+    private void SkipTutorial()  // added: Method to skip the tutorial
+    {
+        tutorialCanvas.SetActive(false);  // Hide tutorial panel
+        Time.timeScale = 1f;  // Resume the game
+        isTutorialActive = false;
+    }
+    
+    private void ShowCurrentTutorialPanel()  // added: Method to show the current tutorial panel
+    {
+        for (int i = 0; i < tutorialPanels.Length; i++)
+        {
+            tutorialPanels[i].SetActive(i == currentTutorialPanelIndex);
+        }
+    }
+
+    private void ShowNextTutorialPanel()  // added: Method to advance to the next tutorial panel
+    {
+        currentTutorialPanelIndex++;
+        if (currentTutorialPanelIndex < tutorialPanels.Length)
+        {
+            ShowCurrentTutorialPanel();
+        }
+        else
+        {
+            EndTutorial();
+        }
+    }
+
+    private void EndTutorial()  // added: Method to end the tutorial
+    {
+        foreach (GameObject panel in tutorialPanels)
+        {
+            panel.SetActive(false);
+        }
+        Time.timeScale = 1f;  // Resume the game
+        isTutorialActive = false;
+        
+        StartGame();
+    }
+    
+    [MenuItem("Tools/Reset Tutorial Preference")]
+    private static void ResetTutorialPreference()
+    {
+        PlayerPrefs.SetInt("FirstTimePlaying", 1);
+        PlayerPrefs.Save();
+        Debug.Log("Tutorial preference reset. It will show on the next game start.");
     }
     
 }
