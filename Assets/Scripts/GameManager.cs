@@ -12,6 +12,7 @@ public class GameManager : MonoBehaviour
     public GameObject mainMenu;
     public GameObject gameUI;
     public GameObject endScreen;
+    public GameObject pausePanel;
     public TextMeshProUGUI finalScoreText;
     public TextMeshProUGUI timerText;  // Reference to the timer text UI element
     public float gameDuration = 60f;
@@ -24,7 +25,21 @@ public class GameManager : MonoBehaviour
     //END MENU CANVAS
     public Button HomeBtn;
     public Button ReplayBtn;
-    public Button NextLevelBtn;
+    
+    //PAUSE PANEL
+    public Button pauseHomeBtn;
+    public Button pauseContinueBtn;
+    public Button pauseReplayBtn;
+    
+    private bool isPaused = false;
+
+    public bool IsPaused
+    {
+        get => isPaused;
+        private set {  }
+    }
+
+    private float originalTimeScale;
 
     [HideInInspector]
     public bool isGameRunning = false;
@@ -40,7 +55,9 @@ public class GameManager : MonoBehaviour
         StartBtn.onClick.AddListener(OnClickStart);
         HomeBtn.onClick.AddListener(OnClickHome);
         ReplayBtn.onClick.AddListener(OnClickReplay);
-        NextLevelBtn.onClick.AddListener(OnClickNextLevel);
+        pauseHomeBtn.onClick.AddListener(OnClickHome);
+        pauseContinueBtn.onClick.AddListener(ResumeGame);
+        pauseReplayBtn.onClick.AddListener(OnClickReplay);
     }
 
     void Start()
@@ -55,13 +72,23 @@ public class GameManager : MonoBehaviour
         StartBtn.onClick.RemoveListener(OnClickStart);
         HomeBtn.onClick.RemoveListener(OnClickHome);
         ReplayBtn.onClick.RemoveListener(OnClickReplay);
-        NextLevelBtn.onClick.RemoveListener(OnClickNextLevel);
+        pauseHomeBtn.onClick.RemoveListener(OnClickHome);
+        pauseContinueBtn.onClick.RemoveListener(ResumeGame);
+        pauseReplayBtn.onClick.RemoveListener(OnClickReplay);
     }
 
     void Update()
     {
         if (isGameRunning)
         {
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                if (isPaused)
+                    ResumeGame();
+                else
+                    PauseGame();
+            }
+            
             gameTimer -= Time.deltaTime;
             if (gameTimer <= 0)
             {
@@ -98,14 +125,14 @@ public class GameManager : MonoBehaviour
 
     public void StartGame()
     {
-        ResetGameData();
+        // ResetGameData();
         gameTimer = gameDuration;
         isGameRunning = true;
         mainMenu.SetActive(false);
         gameUI.SetActive(true);
         endScreen.SetActive(false);
         InitializeSpawnIntervals();  // Initialize spawn intervals for the game
-        BallSpawner.SpawnInitialBalls(playerController.initialSpawnCount, 3);
+        BallSpawner.SpawnInitialBalls(playerController.initialSpawnCount, 1);
     }
 
     public void EndGame()
@@ -132,10 +159,13 @@ public class GameManager : MonoBehaviour
 
     private void ResetGameData()
     {
+        StopAllCoroutines();
+        BallSpawner.StopSpawning();
+        VFXManager.Instance.DeActivateAll();
         ScoringSystem.ResetScore();  // Reset score on returning to main menu
         playerController.ResetPlayer();  // Reset player state if necessary
         BallSpawner.ResetObjectPools();
-        UpdateTimerUI(); 
+        UpdateTimerUI();
     }
 
     private void OnClickStart()
@@ -145,17 +175,41 @@ public class GameManager : MonoBehaviour
 
     private void OnClickHome()
     {
+        if (isPaused)
+        {
+            ResumeGame();
+        }
         ReturnToMainMenu();
     }
 
     private void OnClickReplay()
     {
+        if (isPaused)
+        {
+            ResumeGame();
+        }
+        ResetGameData();
         StartGame();
     }
     
     private void OnClickNextLevel()
     {
         
+    }
+    
+    void PauseGame()
+    {
+        originalTimeScale = Time.timeScale;
+        Time.timeScale = 0f; // Stop all game activity
+        isPaused = true;
+        pausePanel.SetActive(true); // Show pause panel
+    }
+
+    public void ResumeGame()
+    {
+        Time.timeScale = originalTimeScale; // Resume original time scale
+        isPaused = false;
+        pausePanel.SetActive(false); // Hide pause panel
     }
     
 }

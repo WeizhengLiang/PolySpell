@@ -60,7 +60,7 @@ public class EvilBall : MonoBehaviour
         UpdateHealthText();
         if (health <= 0)
         {
-            VFXManager.Instance.SpawnVFX(VFXManager.Instance.EvilBallDieEffectPrefab, transform.position);
+            VFXManager.Instance.SpawnVFX(VFXType.EvilBallDieEffect ,VFXManager.Instance.EvilBallDieEffectPrefab, transform.position);
             ScoringSystem.AddScore(Mathf.CeilToInt(maxHealth / 10));
             ReturnToPool();
         }
@@ -125,7 +125,7 @@ public class EvilBall : MonoBehaviour
             return;
         }
         
-        VFXManager.Instance.SpawnVFXWithFadeOut(VFXManager.Instance.shieldBreakingEffectPrefab, transform.position);
+        VFXManager.Instance.SpawnVFXWithFadeOut(VFXType.shieldBreakingEffect ,VFXManager.Instance.shieldBreakingEffectPrefab, transform.position);
         hasShield = false;
         Shield.SetActive(hasShield);
         Debug.Log("Shield broken");

@@ -10,11 +10,14 @@ public class ObjectPool : MonoBehaviour
 
     void Start()
     {
-        for (int i = 0; i < initialPoolSize; i++)
+        if (objectPool.Count < initialPoolSize)
         {
-            GameObject obj = Instantiate(objectPrefab);
-            obj.SetActive(false);
-            objectPool.Enqueue(obj);
+            for (int i = 0; i < initialPoolSize; i++)
+            {
+                GameObject obj = Instantiate(objectPrefab);
+                obj.SetActive(false);
+                objectPool.Enqueue(obj);
+            }
         }
     }
 
@@ -29,7 +32,16 @@ public class ObjectPool : MonoBehaviour
         {
             obj = Instantiate(objectPrefab);
         }
-        if(!activeObjList.Contains(obj))activeObjList.Add(obj);
+
+        if (!activeObjList.Contains(obj))
+        {
+            // Debug.LogWarning("Object added into active list during getting!");
+            activeObjList.Add(obj);
+        }
+        else
+        {
+            // Debug.LogWarning("Object added into active list during Getting!");
+        }
         obj.SetActive(true);
         InitializeObject(obj);
         return obj;
@@ -37,8 +49,18 @@ public class ObjectPool : MonoBehaviour
 
     public void ReturnObject(GameObject obj)
     {
+        if (!activeObjList.Contains(obj))
+        {
+            Debug.LogWarning("Object not found in active list during return!");
+            return;
+        }
         activeObjList.Remove(obj);
         obj.SetActive(false);
+        if (objectPool.Contains(obj))
+        {
+            Debug.LogWarning("You cannot enqueue game object that already in the q");
+            return;
+        }
         objectPool.Enqueue(obj);
     }
     

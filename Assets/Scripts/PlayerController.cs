@@ -49,7 +49,7 @@ public class PlayerController : MonoBehaviour
     {
         Vector2 currentPosition = transform.position;
 
-        if (Input.GetMouseButtonDown(0) && GameManager.gameUI.activeSelf && !SlowMotionManager.inSlowMotion)
+        if (Input.GetMouseButtonDown(0) && GameManager.gameUI.activeSelf && !SlowMotionManager.inSlowMotion && !GameManager.IsPaused)
         {
             // Slow down time for aiming
             SlowMotionManager.EnterSlowMotion();
@@ -58,7 +58,7 @@ public class PlayerController : MonoBehaviour
         
         // todo: add cancel aiming action
         
-        if (Input.GetMouseButtonUp(0) && GameManager.gameUI.activeSelf && SlowMotionManager.inSlowMotion)
+        if (Input.GetMouseButtonUp(0) && GameManager.gameUI.activeSelf && SlowMotionManager.inSlowMotion && !GameManager.IsPaused)
         {
             Arrow.Deactivate();
             if (!EnergySystem.IsEnergyEmpty)
@@ -315,7 +315,7 @@ public class PlayerController : MonoBehaviour
         if (col.gameObject.CompareTag("EvilBall"))
         {
             Vector2 contactPoint = col.contacts[0].point;
-            VFXManager.Instance.SpawnVFX(VFXManager.Instance.hitEffectPrefab, contactPoint);
+            VFXManager.Instance.SpawnVFX(VFXType.hitEffect ,VFXManager.Instance.hitEffectPrefab, contactPoint);
             HealthSystem.TakeDamage(10f);  // Adjust damage value as necessary
             // DisplayNotification("-10", Color.red);
         }
@@ -491,6 +491,8 @@ public class PlayerController : MonoBehaviour
     
     public void ResetPlayer()
     {
+        StopAllCoroutines();
+        
         // Reset bob
         transform.position = Vector2.zero;
         rb.velocity = Vector2.zero;

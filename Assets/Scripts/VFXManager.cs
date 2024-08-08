@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using CartoonFX;
 using Unity.Mathematics;
 using UnityEngine;
@@ -7,6 +8,8 @@ using UnityEngine;
 public class VFXManager : MonoBehaviour
 {
     public static VFXManager Instance;
+
+    public List<VFX> effectPool = new List<VFX>();
 
     public GameObject hitEffectPrefab;
     public GameObject killEffectPrefab;
@@ -36,19 +39,64 @@ public class VFXManager : MonoBehaviour
         }
     }
 
-    public void SpawnVFXWithFadeOut(GameObject prefab, Vector2 position, float fadeDuration = 1.5f)
+    public void SpawnVFXWithFadeOut(VFXType type, GameObject prefab, Vector2 position, float fadeDuration = 1.5f)
     {
-        GameObject vfx = Instantiate(prefab, position, Quaternion.identity);
-        StartCoroutine(FadeOutVFX(vfx, fadeDuration));
+        GameObject vfx;
+        VFX vfxStruct;
+        if (effectPool.Exists(x => x.type == type && x.inUse == false))
+        {
+            vfxStruct = effectPool.FirstOrDefault(x => x.type == type && x.inUse == false);
+            vfxStruct.go.transform.position = position;
+            vfxStruct.go.SetActive(true);
+            vfxStruct.inUse = true;
+        }
+        else
+        {
+            vfx = Instantiate(prefab, position, Quaternion.identity);
+            vfxStruct = new VFX
+            {
+                type = type,
+                go = vfx,
+                inUse = true
+            };
+            effectPool.Add(vfxStruct);
+        }
+        StartCoroutine(FadeOutVFX(vfxStruct, fadeDuration));
     }
     
-    public GameObject SpawnVFX(GameObject prefab, Vector2 position)
+    public VFX SpawnVFX(VFXType type, GameObject prefab, Vector2 position)
     {
-        return Instantiate(prefab, position, Quaternion.identity);
+        VFX vfxStruct;
+        if (effectPool.Exists(x => x.type == type && x.inUse == false))
+        {
+            vfxStruct = effectPool.FirstOrDefault(x => x.type == type && x.inUse == false);
+            if (vfxStruct.go == null)
+            {
+                
+            }
+
+            vfxStruct.go.transform.position = position;
+            vfxStruct.go.SetActive(true);
+            vfxStruct.inUse = true;
+        }
+        else
+        {
+            var vfx = Instantiate(prefab, position, Quaternion.identity);
+            vfxStruct = new VFX
+            {
+                type = type,
+                go = vfx,
+                inUse = true
+            };
+            effectPool.Add(vfxStruct);
+        }
+        return vfxStruct;
     }
     
-    private IEnumerator FadeOutVFX(GameObject vfx, float fadeDuration)
+    private IEnumerator FadeOutVFX(VFX vfxStruct, float fadeDuration)
     {
+        var vfx = vfxStruct.go;
+        
         ParticleSystem particleSystem = vfx.GetComponent<ParticleSystem>();
         if (particleSystem != null)
         {
@@ -73,7 +121,7 @@ public class VFXManager : MonoBehaviour
                 yield return null;
             }
 
-            Destroy(vfx);
+            DeActivate(vfxStruct);
         }
     }
 
@@ -118,4 +166,55 @@ public class VFXManager : MonoBehaviour
             Debug.LogWarning("textVFX incorrectly recycled");
         }
     }
+
+    public void DeActivateAll()
+    {
+        StopAllCoroutines();
+        for (int i = 0; i < effectPool.Count; i++)
+        {
+            var fx = effectPool[i];
+            DeActivate(fx);
+        }
+    }
+    
+    public void DeActivate(VFX fx)
+    {
+        if (fx.go != null)
+        {
+            fx.go.SetActive(false);
+            fx.inUse = false;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        for (int i = effectPool.Count - 1; i >= 0; i--)
+        {
+            Destroy(effectPool[i].go);
+        }
+        effectPool.Clear();
+    }
+}
+
+public class VFX
+{
+    public VFXType type;
+    public GameObject go;
+    public bool inUse;
+}
+
+public enum VFXType
+{
+    hitEffect,
+    killEffect,
+    killEffectPurple,
+    killEffectBlue,
+    killEffectYellow,
+    shieldBreakingEffect,
+    BlueSpawningEffect,
+    YelloSpawningEffect,
+    PurpleSpawningEffect,
+    RedSpawningEffect,
+    EvilBallDieEffect,
+    PopTextEffect,
 }

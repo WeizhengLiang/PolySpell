@@ -63,7 +63,10 @@ public class NormalBall : MonoBehaviour
 
     private void OnBecameInvisible()
     {
-        ReturnToPool();
+        if (gameObject.activeSelf) // only when it ran out of view
+        {
+            ReturnToPool();
+        }
     }
 
     public void ReturnToPool()
@@ -85,13 +88,13 @@ public class NormalBall : MonoBehaviour
         switch (powerUp)
         {
             case PowerUpType.Size:
-                VFXManager.Instance.SpawnVFXWithFadeOut(VFXManager.Instance.killEffectYellowPrefab, pos, 1f);
+                VFXManager.Instance.SpawnVFXWithFadeOut(VFXType.killEffectYellow ,VFXManager.Instance.killEffectYellowPrefab, pos, 1f);
                 break;
             case PowerUpType.Speed:
-                VFXManager.Instance.SpawnVFXWithFadeOut(VFXManager.Instance.killEffectPurplePrefab, pos, 1f);
+                VFXManager.Instance.SpawnVFXWithFadeOut(VFXType.killEffectPurple ,VFXManager.Instance.killEffectPurplePrefab, pos, 1f);
                 break;
             case PowerUpType.None:
-                VFXManager.Instance.SpawnVFXWithFadeOut(VFXManager.Instance.killEffectBluePrefab, pos, 1f);
+                VFXManager.Instance.SpawnVFXWithFadeOut(VFXType.killEffectBlue ,VFXManager.Instance.killEffectBluePrefab, pos, 1f);
                 break;
         }
     }
@@ -101,13 +104,13 @@ public class NormalBall : MonoBehaviour
         switch (powerUp)
         {
             case PowerUpType.Size:
-                VFXManager.Instance.SpawnVFXWithFadeOut(VFXManager.Instance.YelloSpawningEffectPrefab, pos, 1f);
+                VFXManager.Instance.SpawnVFXWithFadeOut(VFXType.YelloSpawningEffect ,VFXManager.Instance.YelloSpawningEffectPrefab, pos, 1f);
                 break;
             case PowerUpType.Speed:
-                VFXManager.Instance.SpawnVFXWithFadeOut(VFXManager.Instance.PurpleSpawningEffectPrefab, pos, 1f);
+                VFXManager.Instance.SpawnVFXWithFadeOut(VFXType.PurpleSpawningEffect ,VFXManager.Instance.PurpleSpawningEffectPrefab, pos, 1f);
                 break;
             case PowerUpType.None:
-                VFXManager.Instance.SpawnVFXWithFadeOut(VFXManager.Instance.BlueSpawningEffectPrefab, pos, 1f);
+                VFXManager.Instance.SpawnVFXWithFadeOut(VFXType.BlueSpawningEffect ,VFXManager.Instance.BlueSpawningEffectPrefab, pos, 1f);
                 break;
         }
     }

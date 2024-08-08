@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class BallSpawner : MonoBehaviour
 {
@@ -9,6 +10,11 @@ public class BallSpawner : MonoBehaviour
     public ObjectPool normalBallPool;
     public ObjectPool evilBallPool;
     public Transform playerTransform;  // Reference to the player's transform
+    
+    public void StopSpawning()
+    {
+        StopAllCoroutines();
+    }
 
     public void SpawnInitialBalls(int normalBallCount, int evilBallCount)
     {
@@ -18,20 +24,19 @@ public class BallSpawner : MonoBehaviour
 
     public IEnumerator SpawnNormalBallWithAnimation(Vector2 position)
     {
-        GameObject sparkle = VFXManager.Instance.SpawnVFX(VFXManager.Instance.BlueSpawningEffectPrefab, position);
+        var sparkle = VFXManager.Instance.SpawnVFX(VFXType.BlueSpawningEffect ,VFXManager.Instance.BlueSpawningEffectPrefab, position);
         yield return new WaitForSeconds(1.5f);  // Duration of the sparkle animation
-
-        Destroy(sparkle);
+        VFXManager.Instance.DeActivate(sparkle);
 
         SpawnNormalBall(position);
     }
 
     public IEnumerator SpawnEvilBallWithAnimation(Vector2 position)
     {
-        GameObject sparkle = Instantiate(evilBallSparklePrefab, position, Quaternion.identity);
+        // GameObject sparkle = Instantiate(evilBallSparklePrefab, position, Quaternion.identity);
+        var sparkle = VFXManager.Instance.SpawnVFX(VFXType.RedSpawningEffect ,VFXManager.Instance.RedSpawningEffectPrefab, position);
         yield return new WaitForSeconds(1.5f);  // Duration of the sparkle animation
-
-        Destroy(sparkle);
+        VFXManager.Instance.DeActivate(sparkle);
 
         SpawnEvilBall(position);
     }
