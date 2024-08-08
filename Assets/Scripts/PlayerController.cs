@@ -1,7 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
 using Kalkatos.DottedArrow;
-using Unity.Mathematics;
 using Random = UnityEngine.Random;
 
 public class PlayerController : MonoBehaviour
@@ -17,6 +16,7 @@ public class PlayerController : MonoBehaviour
     public int initialSpawnCount = 10;  // Number of normal balls to spawn at the start
     public GameObject polygonVisualizerPrefab;  // Reference to the Polygon Visualizer prefab
     public GameObject Marker;
+    public GameObject Marker2;
     public GameObject notificationDisplayPrefab;  // Reference to the notification display prefab
     public Arrow Arrow;
     public BallSpawner BallSpawner;
@@ -103,12 +103,13 @@ public class PlayerController : MonoBehaviour
                 if (currentLength >= keyValuePair.Value.Item1)
                 {
                     int polygonType = keyValuePair.Value.Item2;
+                    var startEndTrailPoint = keyValuePair.Key;
                     Debug.Log($"{GetPolygonType(polygonType)} formed");
                     polygonEnergy = energyConsumedForCurrentTrait;  // Set the energy used for the polygon
                     ShowPolygon(keyValuePair.Key, polygonType);  // Show the polygon visual
                     if (polygonType == 4)  // changed: Check if quadrilateral
                     {
-                        BreakEvilBallsInsidePolygon();  // changed: Handle breaking shields for quadrilaterals
+                        BreakEvilBallsInsidePolygon(startEndTrailPoint);  // changed: Handle breaking shields for quadrilaterals
                     }
                     else if (polygonType == 5)  // changed: Check if pentagon
                     {
@@ -120,10 +121,10 @@ public class PlayerController : MonoBehaviour
                     }
                     else
                     {
-                        KillBallsInsidePolygon();  // changed: Handle damage for other polygons
+                        KillBallsInsidePolygon(startEndTrailPoint);  // changed: Handle damage for other polygons
                     }
                     if(polygonType != -1) 
-                        TransformExtraTraitIntoNormalBalls(keyValuePair.Key, polygonType);  // Handle extra trait
+                        TransformExtraTraitIntoNormalBalls(startEndTrailPoint, polygonType);  // Handle extra trait
                     ClearData();
                     _trailRenderer.Clear();
                     _trailRenderer.enabled = false;
@@ -409,24 +410,28 @@ public class PlayerController : MonoBehaviour
         HealthSystem.Heal(polygonEnergy);  // Heal Bob based on the energy used to form the polygon
     }
     
-    void BreakEvilBallsInsidePolygon()  // changed: New method to break evil ball shields
+    void BreakEvilBallsInsidePolygon(Vector2 startEndTrailPoint)  // changed: New method to break evil ball shields
     {
         foreach (GameObject ball in BallSpawner.evilBallPool.activeObjList)
         {
-            if (IsPointInPolygon(ball.transform.position))
+            // Instantiate(Marker2, ball.transform.position, quaternion.identity);
+            if (IsPointInPolygon(ball.transform.position, startEndTrailPoint))
             {
+                // Instantiate(Marker, ball.transform.position, quaternion.identity);
                 ball.GetComponent<EvilBall>().BreakShield();
             }
         }
     }
 
-    void KillBallsInsidePolygon()  // changed: updated method to handle killing balls inside polygon
+    void KillBallsInsidePolygon(Vector2 startEndTrailPoint)  // changed: updated method to handle killing balls inside polygon
     {
         for (int i = BallSpawner.normalBallPool.activeObjList.Count - 1; i >= 0; i--)
         {
             var ball = BallSpawner.normalBallPool.activeObjList[i];
-            if (IsPointInPolygon(ball.transform.position))
+            // Instantiate(Marker2, ball.transform.position, quaternion.identity);
+            if (IsPointInPolygon(ball.transform.position, startEndTrailPoint))
             {
+                // Instantiate(Marker, ball.transform.position, quaternion.identity);
                 BallSpawner.normalBallPool.ReturnObject(ball);
                 EnergySystem.GainEnergy(EnergySystem.energyGainAmount);
                 ScoringSystem.AddScore(1);  // Add score for killing normal ball
@@ -436,8 +441,10 @@ public class PlayerController : MonoBehaviour
         for (int i = BallSpawner.evilBallPool.activeObjList.Count - 1; i >= 0; i--)
         {
             var ball = BallSpawner.evilBallPool.activeObjList[i];
-            if (IsPointInPolygon(ball.transform.position))
+            // Instantiate(Marker2, ball.transform.position, quaternion.identity);
+            if (IsPointInPolygon(ball.transform.position, startEndTrailPoint))
             {
+                // Instantiate(Marker, ball.transform.position, quaternion.identity);
                 ball.GetComponent<EvilBall>().TakeDamage((int)polygonEnergy);
             }
         }
@@ -445,13 +452,18 @@ public class PlayerController : MonoBehaviour
         energyConsumedForCurrentTrait = 0f;  // Reset energy consumed for the current trait
     }
 
-    bool IsPointInPolygon(Vector2 point)
+    bool IsPointInPolygon(Vector2 point, Vector2 startEndTrailPoint)
     {
         int intersectCount = 0;
-        for (int i = 0; i < segmentStartPositions.Count; i++)
+
+        var list = new List<Vector2> { startEndTrailPoint };
+        list.AddRange(segmentEndPositions);
+        list.Add(startEndTrailPoint);
+
+        for (int i = 1; i < list.Count; i++)
         {
-            Vector2 v1 = segmentStartPositions[i];
-            Vector2 v2 = segmentEndPositions[i];
+            Vector2 v1 = list[i];
+            Vector2 v2 = list[i - 1];
 
             if ((v1.y > point.y) != (v2.y > point.y) &&
                 (point.x < (v2.x - v1.x) * (point.y - v1.y) / (v2.y - v1.y) + v1.x))
@@ -463,7 +475,9 @@ public class PlayerController : MonoBehaviour
         // var isIn = (intersectCount % 2) == 1;
         // if (isIn) Instantiate(Marker, new Vector3(point.x, point.y, 0), quaternion.identity);
         
-        return (intersectCount % 2) == 1;
+        bool isIn = (intersectCount % 2) == 1;
+    
+        return isIn;
     }
     
     // Add this field to reference the amount of energy to form the polygon
