@@ -1527,8 +1527,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6b3ad5f705bd41fbb6531e605f604f3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  normalBallSparklePrefab: {fileID: 6030234982206361100, guid: 8194c58bfe7ea4d71b6b0d9ce852315d, type: 3}
-  evilBallSparklePrefab: {fileID: 8500884229842771786, guid: 04ff035087b674b648c89e99c147f9f0, type: 3}
   normalBallPool: {fileID: 1421904943}
   evilBallPool: {fileID: 992304165}
   playerTransform: {fileID: 1018603695}
@@ -10449,7 +10447,6 @@ MonoBehaviour:
   segmentStartPositions: []
   segmentEndPositions: []
   polygonEnergy: 50
-  initialSpawnCount: 10
   polygonVisualizerPrefab: {fileID: 9000707771975878887, guid: 491a965017ccb43f0a2bb028760b38e5, type: 3}
   Marker: {fileID: 4088446733292955402, guid: 67390b469d3f440349dc94d92a47edcd, type: 3}
   Marker2: {fileID: 4088446733292955402, guid: 0eabfea6a5c1040f6bf434db580b91bd, type: 3}
@@ -15958,8 +15955,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   energyBar: {fileID: 370114122}
   energyCircle: {fileID: 1134643770}
-  normalBallPrefab: {fileID: 1420938342263586036, guid: cfcd2f8dcea4a48e19a8c6915fdaf3f8, type: 3}
-  trailRenderer: {fileID: 1018603696}
   energyConsumptionRate: 5
   energyGainAmount: 10
 --- !u!4 &1909041856
