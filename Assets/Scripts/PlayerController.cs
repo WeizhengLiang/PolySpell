@@ -13,7 +13,6 @@ public class PlayerController : MonoBehaviour
     public List<Vector2> segmentStartPositions = new List<Vector2>();
     public List<Vector2> segmentEndPositions = new List<Vector2>();
     public float polygonEnergy;  // Energy used to form the polygon (calculated dynamically)
-    public int initialSpawnCount = 10;  // Number of normal balls to spawn at the start
     public GameObject polygonVisualizerPrefab;  // Reference to the Polygon Visualizer prefab
     public GameObject Marker;
     public GameObject Marker2;

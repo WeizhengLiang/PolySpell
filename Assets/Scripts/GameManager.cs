@@ -70,7 +70,7 @@ public class GameManager : MonoBehaviour
     
     private float gameTimer = 0f;
     private float[] spawnIntervals;
-    private int spawnCount = 3;
+    private int spawnCount = 2;
     private int spawnedCount = 0;
 
     void Awake()
@@ -165,7 +165,7 @@ public class GameManager : MonoBehaviour
         spawnIntervals = new float[spawnCount];
         for (int i = 0; i < spawnCount; i++)
         {
-            spawnIntervals[i] = Random.Range(0f, gameDuration);
+            spawnIntervals[i] = Random.Range(0f, gameDuration - gameDuration / 4f);
         }
         System.Array.Sort(spawnIntervals);
     }
@@ -174,7 +174,7 @@ public class GameManager : MonoBehaviour
     {
         if (spawnedCount < spawnCount && gameTimer <= spawnIntervals[spawnedCount])
         {
-            BallSpawner.SpawnInitialBalls(5, 1);
+            BallSpawner.SpawnInitialBalls(5, 2 + spawnedCount);
             spawnedCount++;
         }
     }
@@ -193,7 +193,7 @@ public class GameManager : MonoBehaviour
         gameUI.SetActive(true);
         endScreen.SetActive(false);
         InitializeSpawnIntervals();  // Initialize spawn intervals for the game
-        BallSpawner.SpawnInitialBalls(playerController.initialSpawnCount, 1);
+        BallSpawner.SpawnInitialBalls(10, 2);
     }
 
     public void EndGame()

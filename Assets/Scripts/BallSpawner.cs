@@ -4,9 +4,6 @@ using Random = UnityEngine.Random;
 
 public class BallSpawner : MonoBehaviour
 {
-    public GameObject normalBallSparklePrefab;  // Reference to the normal ball sparkle effect prefab
-    public GameObject evilBallSparklePrefab;    // Reference to the evil ball sparkle effect prefab
-
     public ObjectPool normalBallPool;
     public ObjectPool evilBallPool;
     public Transform playerTransform;  // Reference to the player's transform
