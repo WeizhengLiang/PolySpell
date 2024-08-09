@@ -137,6 +137,10 @@ public class PlayerController : MonoBehaviour
             if (!EnergySystem.ConsumeEnergy(energyCost))
             {
                 // Stop moving and disable the trail renderer when out of energy
+                if (_trailRenderer.positionCount > 0)
+                {
+                    ClearTrailAndSpawnBalls();
+                }
                 ClearData();
                 isMoving = false;
                 isNewPoly = true;
@@ -487,6 +491,50 @@ public class PlayerController : MonoBehaviour
     //     GameObject notification = Instantiate(notificationDisplayPrefab, spawnPosition, Quaternion.identity);
     //     notification.GetComponent<NotificationDisplay>().Initialize(message, color);
     // }
+    
+    private void ClearTrailAndSpawnBalls()
+    {
+        // Calculate the total length of the trail
+        float trailLength = CalculateTrailLength();
+
+        // Determine the interval for spawning normal balls
+        int numberOfBalls = Mathf.CeilToInt(trailLength);
+        float interval = trailLength / numberOfBalls;
+
+        // Spawn normal balls at regular intervals along the trail
+        float distanceCovered = 0f;
+        Vector3 lastPosition = _trailRenderer.GetPosition(0);
+        for (int i = 1; i < _trailRenderer.positionCount; i++)
+        {
+            Vector3 currentPosition = _trailRenderer.GetPosition(i);
+            float segmentLength = Vector3.Distance(lastPosition, currentPosition);
+            while (distanceCovered + segmentLength >= interval)
+            {
+                float remainingDistance = interval - distanceCovered;
+                Vector3 spawnPosition = Vector3.Lerp(lastPosition, currentPosition, remainingDistance / segmentLength);
+                StartCoroutine(BallSpawner.SpawnNormalBallWithAnimation(spawnPosition));
+                distanceCovered = 0f;
+                segmentLength -= remainingDistance;
+                lastPosition = spawnPosition;
+            }
+            distanceCovered += segmentLength;
+            lastPosition = currentPosition;
+        }
+        
+        // Clear the trail renderer
+        _trailRenderer.Clear();
+        _trailRenderer.enabled = false;
+    }
+
+    private float CalculateTrailLength()
+    {
+        float length = 0f;
+        for (int i = 0; i < _trailRenderer.positionCount - 1; i++)
+        {
+            length += Vector3.Distance(_trailRenderer.GetPosition(i), _trailRenderer.GetPosition(i + 1));
+        }
+        return length;
+    }
     
     public void ResetPlayer()
     {
