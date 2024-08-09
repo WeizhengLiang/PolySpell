@@ -1,7 +1,7 @@
-using System;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
@@ -10,41 +10,58 @@ public class GameManager : MonoBehaviour
     public ScoringSystem ScoringSystem;
     public PlayerController playerController;  // Reference to the PlayerController
     public BallSpawner BallSpawner;
+
+    //---------------------MAIN MENU CANVAS---------------------
     public GameObject mainMenu;
-    public GameObject gameUI;
-    public GameObject endScreen;
-    public GameObject pausePanel;
-    public GameObject tutorialCanvas;
-    public TextMeshProUGUI finalScoreText;
-    public TextMeshProUGUI timerText;  // Reference to the timer text UI element
-    public float gameDuration = 60f;
-    
-    //MAIN MENU CANVAS
     public Button StartBtn;
+    public Button SettingBtn;
+    public TextMeshProUGUI ScoreLevelText;
     
-    //IN-GAME CANVAS
+    // Setting panel
+    public GameObject settingsPanel; // Added: Reference to Settings panel
+    public Button bgmToggle;
+    public GameObject bgmOn;
+    public GameObject bgmOff;
+    public Button sfxToggle;
+    public GameObject sfxOn;
+    public GameObject sfxOff;
+    public Button Quit;
+    public Button CloseSetting;
+
+
+    // Confirm Quit Panel
+    public GameObject confirmQuitPanel; // Added: Reference to Confirm Quit panel
+    public Button ConfirmQuit;
+    public Button CancelQuit;
     
-    //END MENU CANVAS
-    public Button HomeBtn;
-    public Button ReplayBtn;
+    //---------------------IN-GAME CANVAS---------------------
+    public GameObject gameUI;
+    public TextMeshProUGUI finalScoreText;
+    public TextMeshProUGUI timerText;
     
     //PAUSE PANEL
+    public GameObject pausePanel;
     public Button pauseHomeBtn;
     public Button pauseContinueBtn;
     public Button pauseReplayBtn;
-    
-    // tutorial
+
+    //---------------------END MENU CANVAS---------------------
+    public GameObject endScreen;
+    public Button HomeBtn;
+    public Button ReplayBtn;
+
+    //---------------------TUTORIAL CANVAS---------------------
+    public GameObject tutorialCanvas;
     public GameObject[] tutorialPanels;
     
+    
+    
+    public float gameDuration = 60f;
     private bool isPaused = false;
-    private bool isTutorialActive = false; 
+    private bool isTutorialActive = false;
     private int currentTutorialPanelIndex = 0;
 
-    public bool IsPaused
-    {
-        get => isPaused;
-        private set {  }
-    }
+    public bool IsPaused => isPaused;
 
     private float originalTimeScale;
 
@@ -64,6 +81,14 @@ public class GameManager : MonoBehaviour
         pauseHomeBtn.onClick.AddListener(OnClickHome);
         pauseContinueBtn.onClick.AddListener(ResumeGame);
         pauseReplayBtn.onClick.AddListener(OnClickReplay);
+        
+        SettingBtn.onClick.AddListener(OnClickSettingBtn);
+        CloseSetting.onClick.AddListener(OnClickCloseSetting);
+        Quit.onClick.AddListener(OnClickQuitBtn);
+        ConfirmQuit.onClick.AddListener(OnClickConfirmQuitBtn);
+        CancelQuit.onClick.AddListener(OnClickCancelQuitBtn);
+        bgmToggle.onClick.AddListener(OnClickBGMToggle);
+        sfxToggle.onClick.AddListener(OnClickSfxToggle);
     }
 
     void Start()
@@ -81,6 +106,14 @@ public class GameManager : MonoBehaviour
         pauseHomeBtn.onClick.RemoveListener(OnClickHome);
         pauseContinueBtn.onClick.RemoveListener(ResumeGame);
         pauseReplayBtn.onClick.RemoveListener(OnClickReplay);
+        
+        SettingBtn.onClick.RemoveListener(OnClickSettingBtn);
+        CloseSetting.onClick.RemoveListener(CloseSettingPanel);
+        Quit.onClick.RemoveListener(OnClickQuitBtn);
+        ConfirmQuit.onClick.RemoveListener(OnClickConfirmQuitBtn);
+        CancelQuit.onClick.RemoveListener(OnClickCancelQuitBtn);
+        bgmToggle.onClick.RemoveListener(OnClickBGMToggle);
+        sfxToggle.onClick.RemoveListener(OnClickSfxToggle);
     }
 
     void Update()
@@ -103,10 +136,24 @@ public class GameManager : MonoBehaviour
             UpdateTimerUI();
             HandleSpawning();
         }
-        if (isTutorialActive && Input.GetKeyDown(KeyCode.Escape))
+        else
         {
-            SkipTutorial();  // added: Skip tutorial if player presses Esc
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                if (isTutorialActive)
+                {
+                    SkipTutorial(); 
+                }
+
+                if (mainMenu.activeSelf)
+                {
+                    if(settingsPanel.activeSelf) CloseSettingPanel();
+                    else OpenSettingPanel();
+                }
+            }
         }
+        
+        
         if (isTutorialActive && Input.GetMouseButtonDown(0))
         {
             ShowNextTutorialPanel();  // added: Advance to the next tutorial panel on left mouse click
@@ -152,7 +199,10 @@ public class GameManager : MonoBehaviour
     public void EndGame()
     {
         isGameRunning = false;
+        if(PlayerPrefsManager.Instance.LoadInt(PlayerPrefsKeys.HighScore) < ScoringSystem.GetFinalScore())
+            PlayerPrefsManager.Instance.SaveInt(PlayerPrefsKeys.HighScore, ScoringSystem.GetFinalScore());
         finalScoreText.text = ScoringSystem.GetFinalScore().ToString();
+        RefreshHighestScoreLevelText();
         gameUI.SetActive(false);
         endScreen.SetActive(true);
     }
@@ -165,6 +215,7 @@ public class GameManager : MonoBehaviour
     public void ShowMainMenu()
     {
         isGameRunning = false;
+        RefreshHighestScoreLevelText();
         mainMenu.SetActive(true);
         gameUI.SetActive(false);
         endScreen.SetActive(false);
@@ -185,10 +236,10 @@ public class GameManager : MonoBehaviour
     private void OnClickStart()
     {
         // Check if it's the player's first time playing
-        if (PlayerPrefs.GetInt("FirstTimePlaying", 1) == 1)
+        if (PlayerPrefsManager.Instance.LoadInt(PlayerPrefsKeys.FirstTimePlaying, 1) == 1)
         {
             ShowTutorial();  // added: Show tutorial if first time playing
-            PlayerPrefs.SetInt("FirstTimePlaying", 0);  // Update to indicate player has seen the tutorial
+            PlayerPrefsManager.Instance.SaveInt(PlayerPrefsKeys.FirstTimePlaying, 0);  // Update to indicate player has seen the tutorial
         }
         else
         {
@@ -214,12 +265,7 @@ public class GameManager : MonoBehaviour
         ResetGameData();
         StartGame();
     }
-    
-    private void OnClickNextLevel()
-    {
-        
-    }
-    
+
     void PauseGame()
     {
         originalTimeScale = Time.timeScale;
@@ -283,13 +329,76 @@ public class GameManager : MonoBehaviour
         
         StartGame();
     }
-    
-    [MenuItem("Tools/Reset Tutorial Preference")]
-    private static void ResetTutorialPreference()
+
+    private void CloseSettingPanel()
     {
-        PlayerPrefs.SetInt("FirstTimePlaying", 1);
-        PlayerPrefs.Save();
-        Debug.Log("Tutorial preference reset. It will show on the next game start.");
+        settingsPanel.SetActive(false);
     }
     
+    private void OpenSettingPanel()
+    {
+        settingsPanel.SetActive(true);
+        
+        sfxOn.SetActive(PlayerPrefsManager.Instance.LoadInt(PlayerPrefsKeys.SfxOn) == 1);
+        sfxOff.SetActive(PlayerPrefsManager.Instance.LoadInt(PlayerPrefsKeys.SfxOn) == 0);
+        bgmOn.SetActive(PlayerPrefsManager.Instance.LoadInt(PlayerPrefsKeys.BgmOn) == 1);
+        bgmOff.SetActive(PlayerPrefsManager.Instance.LoadInt(PlayerPrefsKeys.BgmOn) == 0);
+    }
+
+    private void OnClickCloseSetting()
+    {
+        CloseSettingPanel();
+    }
+
+    private void OnClickSettingBtn()
+    {
+        OpenSettingPanel();
+    }
+
+    private void OnClickBGMToggle()
+    {
+        Debug.Log("clicked bgm");
+        var current = PlayerPrefsManager.Instance.LoadInt(PlayerPrefsKeys.BgmOn);
+        var become = current == 1 ? 0 : 1;
+        bgmOn.SetActive(become == 1);
+        bgmOff.SetActive(become == 0);
+        PlayerPrefsManager.Instance.SaveInt(PlayerPrefsKeys.BgmOn, become);
+    }
+    
+    private void OnClickSfxToggle()
+    {
+        Debug.Log("clicked sfx");
+        var current = PlayerPrefsManager.Instance.LoadInt(PlayerPrefsKeys.SfxOn);
+        var become = current == 1 ? 0 : 1;
+        sfxOn.SetActive(become == 1);
+        sfxOff.SetActive(become == 0);
+        PlayerPrefsManager.Instance.SaveInt(PlayerPrefsKeys.SfxOn, become);
+    }
+
+    private void OnClickQuitBtn()
+    {
+        confirmQuitPanel.SetActive(true);
+    }
+
+    private void OnClickConfirmQuitBtn()
+    {
+#if UNITY_EDITOR
+        // If running in the Unity Editor, exit play mode
+        EditorApplication.isPlaying = false;
+#else
+        // If running in a build, quit the application
+        Application.Quit();
+#endif
+    }
+
+    private void OnClickCancelQuitBtn()
+    {
+        confirmQuitPanel.SetActive(false);
+    }
+
+    private void RefreshHighestScoreLevelText()
+    {
+        ScoreLevelText.text = ScoringSystem.GetScoreLevel(PlayerPrefsManager.Instance.LoadInt(PlayerPrefsKeys.HighScore));
+    }
+
 }
