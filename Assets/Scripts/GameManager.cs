@@ -167,16 +167,17 @@ public class GameManager : MonoBehaviour
         spawnIntervals = new float[spawnCount];
         for (int i = 0; i < spawnCount; i++)
         {
-            spawnIntervals[i] = Random.Range(0f, gameDuration - gameDuration / 4f);
+            spawnIntervals[i] = Random.Range(gameDuration / (2f + i), gameDuration);
         }
         System.Array.Sort(spawnIntervals);
+        System.Array.Reverse(spawnIntervals);
     }
     
     void HandleSpawning()
     {
         if (spawnedCount < spawnCount && gameTimer <= spawnIntervals[spawnedCount])
         {
-            BallSpawner.SpawnInitialBalls(5, 2 + spawnedCount);
+            BallSpawner.SpawnInitialBalls(5, 1 + spawnedCount);
             spawnedCount++;
         }
     }
@@ -190,6 +191,7 @@ public class GameManager : MonoBehaviour
     {
         // ResetGameData();
         gameTimer = gameDuration;
+        spawnedCount = 0;
         isGameRunning = true;
         mainMenu.SetActive(false);
         gameUI.SetActive(true);
@@ -226,6 +228,7 @@ public class GameManager : MonoBehaviour
 
     private void ResetGameData()
     {
+        spawnedCount = 0;
         StopAllCoroutines();
         BallSpawner.StopSpawning();
         VFXManager.Instance.DeActivateAll();
