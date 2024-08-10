@@ -10,5 +10,6 @@ public static class PlayerPrefsKeys
     public const string BgmOn = "BgmOn";
     public const string SfxOn = "SfxOn";
     public const string FirstTimePlaying = "FirstTimePlaying";
+    public const string dontShowTutorial = "dontShowTutorial";
     // Add other keys as needed
 }

@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
@@ -53,6 +54,9 @@ public class GameManager : MonoBehaviour
     //---------------------TUTORIAL CANVAS---------------------
     public GameObject tutorialCanvas;
     public GameObject[] tutorialPanels;
+    public Toggle DontShowAgainToggle;
+    public Button nextTutorialPanelBtn;
+    public Button preTutorialPanelBtn;
     
     
     
@@ -89,6 +93,9 @@ public class GameManager : MonoBehaviour
         CancelQuit.onClick.AddListener(OnClickCancelQuitBtn);
         bgmToggle.onClick.AddListener(OnClickBGMToggle);
         sfxToggle.onClick.AddListener(OnClickSfxToggle);
+        DontShowAgainToggle.onValueChanged.AddListener(OnClickDontShowTutorialToggle);
+        nextTutorialPanelBtn.onClick.AddListener(OnClickNextTutorialPanelBtn);
+        preTutorialPanelBtn.onClick.AddListener(OnClickPreviousTutorialPanelBtn);
     }
 
     void Start()
@@ -114,6 +121,9 @@ public class GameManager : MonoBehaviour
         CancelQuit.onClick.RemoveListener(OnClickCancelQuitBtn);
         bgmToggle.onClick.RemoveListener(OnClickBGMToggle);
         sfxToggle.onClick.RemoveListener(OnClickSfxToggle);
+        DontShowAgainToggle.onValueChanged.RemoveListener(OnClickDontShowTutorialToggle);
+        nextTutorialPanelBtn.onClick.RemoveListener(OnClickNextTutorialPanelBtn);
+        preTutorialPanelBtn.onClick.RemoveListener(OnClickPreviousTutorialPanelBtn);
     }
 
     void Update()
@@ -143,20 +153,12 @@ public class GameManager : MonoBehaviour
                 if (isTutorialActive)
                 {
                     SkipTutorial(); 
-                }
-
-                if (mainMenu.activeSelf)
+                } else if (mainMenu.activeSelf)
                 {
                     if(settingsPanel.activeSelf) CloseSettingPanel();
                     else OpenSettingPanel();
                 }
             }
-        }
-        
-        
-        if (isTutorialActive && Input.GetMouseButtonDown(0))
-        {
-            ShowNextTutorialPanel();  // added: Advance to the next tutorial panel on left mouse click
         }
     }
     
@@ -236,10 +238,9 @@ public class GameManager : MonoBehaviour
     private void OnClickStart()
     {
         // Check if it's the player's first time playing
-        if (PlayerPrefsManager.Instance.LoadInt(PlayerPrefsKeys.FirstTimePlaying, 1) == 1)
+        if (PlayerPrefsManager.Instance.LoadInt(PlayerPrefsKeys.dontShowTutorial, 0) == 0)
         {
             ShowTutorial();  // added: Show tutorial if first time playing
-            PlayerPrefsManager.Instance.SaveInt(PlayerPrefsKeys.FirstTimePlaying, 0);  // Update to indicate player has seen the tutorial
         }
         else
         {
@@ -283,6 +284,7 @@ public class GameManager : MonoBehaviour
     
     private void ShowTutorial()  // modified: Method to show the tutorial panels
     {
+        DontShowAgainToggle.isOn = false;
         isTutorialActive = true;
         tutorialCanvas.SetActive(isTutorialActive);
         Time.timeScale = 0f;  // Pause the game while tutorial is active
@@ -317,6 +319,17 @@ public class GameManager : MonoBehaviour
             EndTutorial();
         }
     }
+    
+    private void ShowPreviousTutorialPanel()  // added: Method to advance to the next tutorial panel
+    {
+        currentTutorialPanelIndex = Math.Max(currentTutorialPanelIndex - 1, 0);
+        if (currentTutorialPanelIndex == 0)
+        {
+            
+        }
+        ShowCurrentTutorialPanel();
+        
+    }
 
     private void EndTutorial()  // added: Method to end the tutorial
     {
@@ -326,6 +339,7 @@ public class GameManager : MonoBehaviour
         }
         Time.timeScale = 1f;  // Resume the game
         isTutorialActive = false;
+        tutorialCanvas.SetActive(isTutorialActive);
         
         StartGame();
     }
@@ -394,6 +408,29 @@ public class GameManager : MonoBehaviour
     private void OnClickCancelQuitBtn()
     {
         confirmQuitPanel.SetActive(false);
+    }
+
+    private void OnClickDontShowTutorialToggle(bool arg0)
+    {
+        DontShowAgainToggle.isOn = arg0;
+        var dontShowTutorial = arg0 ? 1 : 0;
+        PlayerPrefsManager.Instance.SaveInt(PlayerPrefsKeys.dontShowTutorial, dontShowTutorial);
+    }
+
+    private void OnClickNextTutorialPanelBtn()
+    {
+        if (tutorialCanvas.activeSelf)
+        {
+            ShowNextTutorialPanel();
+        }
+    }
+    
+    private void OnClickPreviousTutorialPanelBtn()
+    {
+        if (tutorialCanvas.activeSelf)
+        {
+            ShowPreviousTutorialPanel();
+        }
     }
 
     private void RefreshHighestScoreLevelText()

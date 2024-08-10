@@ -95,6 +95,11 @@ public class PlayerPrefsManager : MonoBehaviour
             PlayerPrefs.SetInt(PlayerPrefsKeys.FirstTimePlaying, 0);
         }
         
+        if (!PlayerPrefs.HasKey(PlayerPrefsKeys.dontShowTutorial))
+        {
+            PlayerPrefs.SetInt(PlayerPrefsKeys.dontShowTutorial, 0);
+        }
+        
         if (!PlayerPrefs.HasKey(PlayerPrefsKeys.BgmOn))
         {
             PlayerPrefs.SetInt(PlayerPrefsKeys.BgmOn, 1);
