@@ -20,7 +20,7 @@ public class ScoringSystem : MonoBehaviour
 
     private void UpdateScoreText()
     {
-        scoreText.text = $"{currentScore} <size=42><color=#9399a3>/ {PlayerPrefsManager.Instance.LoadInt(PlayerPrefsKeys.HighScore)}</size></color>";
+        scoreText.text = $"{currentScore} <size=42><color=#9399a3>/ {PlayerPrefsManager.Instance.LoadInt(PlayerPrefsKeys.HighScore, 0)}</size></color>";
         
     }
     
