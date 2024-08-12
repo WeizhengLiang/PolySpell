@@ -24,7 +24,8 @@ public class PlayerController : MonoBehaviour
     private float energyConsumedForCurrentTrait = 0f;  // Track energy consumed for current trait
     private Vector2 lastPosition;
     private bool isMoving = false;
-    private float shootForce = 7f;  // Adjust as necessary
+    private float initialShootForce = 8f;
+    private float shootForce = 8f;
     private float bounceForce = 5f;
     private Rigidbody2D rb;
     private TrailRenderer _trailRenderer;
@@ -281,7 +282,7 @@ public class PlayerController : MonoBehaviour
             {
                 StartCoroutine(VFXManager.Instance.SpawnTextVFX("Speed Up!", transform.position));
                 // rb.velocity *= 1.5f;  // Bob gains speed
-                shootForce *= 1.1f;
+                shootForce *= 1.15f;
                 // DisplayNotification("Speed Up!", Color.blue);
             }
             
@@ -544,6 +545,7 @@ public class PlayerController : MonoBehaviour
         transform.position = Vector2.zero;
         rb.velocity = Vector2.zero;
         transform.localScale = new Vector3(0.6f, 0.6f, 1);
+        shootForce = initialShootForce;
 
         // Reset trail renderer
         _trailRenderer.Clear();

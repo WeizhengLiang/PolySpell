@@ -177,7 +177,7 @@ public class GameManager : MonoBehaviour
     {
         if (spawnedCount < spawnCount && gameTimer <= spawnIntervals[spawnedCount])
         {
-            BallSpawner.SpawnInitialBalls(5, 1 + spawnedCount);
+            BallSpawner.SpawnInitialBalls(5, 1);
             spawnedCount++;
         }
     }

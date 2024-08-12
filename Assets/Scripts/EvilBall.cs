@@ -146,12 +146,12 @@ public class EvilBall : MonoBehaviour
 
             if (normalBall.powerUp == NormalBall.PowerUpType.Size)
             {
-                GainHealth(200f);  // Heal more for size power-up
+                GainHealth(150f);  // Heal more for size power-up
             }
             else if (normalBall.powerUp == NormalBall.PowerUpType.Speed)
             {
                 baseSpeed *= 1.5f;  // Evil ball gains speed
-                rb.velocity *= 1.5f;
+                rb.velocity *= 1.2f;
             }
             
             normalBall.ReturnToPool();  // Remove the normal ball
