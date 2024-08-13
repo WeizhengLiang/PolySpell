@@ -1859,7 +1859,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u5438\u6536\u80FD\u91CF\u7403\u5F97 1 \u5206\n\u6740\u6B7B\u7EA2\u8272\u7403\u5F97\u5176(\u521D\u59CB\u8840\u91CF/
+  m_text: "\u5438\u6536\u9664\u767D\u8272\u5916\u7684\u80FD\u91CF\u7403\u53EF\u4EE5\u5F97\u5206\n\u6740\u6B7B\u7EA2\u8272\u7403\u5F97\u5176(\u521D\u59CB\u8840\u91CF/
     10)\u5206\n\u8BF7\u5728\u65F6\u95F4\u5012\u6570\u7ED3\u675F\u4E4B\u524D\n\u83B7\u5F97\u5C3D\u91CF\u591A\u7684\u5206\u6570"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 6d2dd6354769b4a5d9d0d383ac1dbdc0, type: 2}
@@ -12702,13 +12702,13 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_Sprite: {fileID: 21300000, guid: c3750616792e12a438aa4c3940fd090e, type: 3}
-  m_Type: 0
+  m_Type: 3
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
   m_FillClockwise: 1
-  m_FillOrigin: 0
+  m_FillOrigin: 2
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
 --- !u!222 &1134643771
@@ -15392,7 +15392,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_text: "\u6839\u636E\u4F60\u79FB\u52A8\u800C\u751F\u6210\u7684\u8F68\u8FF9\u662F\u4F60\u901A\u5173\u7684\u4E3B\u8981\u624B\u6BB5!
-    \u4E0D\u8FC7\u5F62\u6210\u8F68\u8FF9\u662F\u9700\u8981\u80FD\u91CF\u7684\n\u649E\u51FB<color=#00C5FF>\u84DD\u8272</color>\u7684\u7403\u53EF\u4EE5\u6062\u590D\u80FD\u91CF\n\u649E\u51FB<color=#FBFF78>\u9EC4\u8272</color>\u7684\u7403\u4F1A\u589E\u52A0\u53D1\u5C04\u529B\u5EA6,
+    \u4E0D\u8FC7\u5F62\u6210\u8F68\u8FF9\u662F\u9700\u8981\u80FD\u91CF\u7684\n\u649E\u51FB<color=#00C5FF>\u84DD\u8272</color>\u548C\u767D\u8272\u7684\u7403\u53EF\u4EE5\u6062\u590D\u80FD\u91CF\n\u649E\u51FB<color=#FBFF78>\u9EC4\u8272</color>\u7684\u7403\u4F1A\u589E\u52A0\u53D1\u5C04\u529B\u5EA6,
     <color=#F869FF>\u7D2B\u8272</color>\u7684\u7403\u4F1A\u7F29\u5C0F\u4F60\u7684\u4F53\u79EF"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 6d2dd6354769b4a5d9d0d383ac1dbdc0, type: 2}
