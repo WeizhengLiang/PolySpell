@@ -8,7 +8,7 @@ public class NormalBall : MonoBehaviour
     public ObjectPool NormalBallPool;
     public float speed = 1f;  // Speed of the normal ball
     
-    public enum PowerUpType { None, Size, Speed }
+    public enum PowerUpType { None, Size, Speed, Trail}
     public PowerUpType powerUp;
     public SpriteRenderer spriteRenderer;
     public TextMeshProUGUI Text;
@@ -27,15 +27,18 @@ public class NormalBall : MonoBehaviour
         // transform.Translate(direction * speed * Time.deltaTime);
     }
 
-    public void Initialize()
+    public void Initialize(bool fromTrait = false)
     {
-        AssignPowerUp();
+        AssignPowerUp(fromTrait);
         rb = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         direction = Random.insideUnitCircle.normalized;
         rb.velocity = direction * speed;
         switch (powerUp)
         {
+            case PowerUpType.Trail:
+                spriteRenderer.color = Color.white;
+                break;
             case PowerUpType.Size:
                 spriteRenderer.color = Color.yellow;
                 break;
@@ -48,8 +51,13 @@ public class NormalBall : MonoBehaviour
         }
     }
     
-    void AssignPowerUp()
+    void AssignPowerUp(bool fromTrait = false)
     {
+        if (fromTrait)
+        {
+            powerUp = PowerUpType.Trail;
+            return;
+        }
         float chance = Random.Range(0f, 1f);
         if (chance < 0.1f)  // 20% chance to be a power-up ball
         {
@@ -95,6 +103,9 @@ public class NormalBall : MonoBehaviour
                 break;
             case PowerUpType.None:
                 VFXManager.Instance.SpawnVFXWithFadeOut(VFXType.killEffectBlue ,VFXManager.Instance.killEffectBluePrefab, pos, 1f);
+                break;
+            case PowerUpType.Trail:
+                VFXManager.Instance.SpawnVFXWithFadeOut(VFXType.killEffectWhite ,VFXManager.Instance.killEffectWhitePrefab, pos, 1f);
                 break;
         }
     }

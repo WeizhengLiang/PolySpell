@@ -16,6 +16,7 @@ public class VFXManager : MonoBehaviour
     public GameObject killEffectPurplePrefab;
     public GameObject killEffectBluePrefab;
     public GameObject killEffectYellowPrefab;
+    public GameObject killEffectWhitePrefab;
     public GameObject shieldBreakingEffectPrefab;
     public GameObject BlueSpawningEffectPrefab;
     public GameObject YelloSpawningEffectPrefab;
@@ -125,7 +126,7 @@ public class VFXManager : MonoBehaviour
         }
     }
 
-    public IEnumerator SpawnTextVFX(string text, Vector2 position)
+    public IEnumerator SpawnTextVFX(string text, Color[] colors, Vector2 position)
     {
         GameObject popTextEffect;
         if (notUseText.Count == 0)
@@ -141,7 +142,7 @@ public class VFXManager : MonoBehaviour
         var fx = popTextEffect.GetComponent<CFXR_ParticleText>();
         var ps = popTextEffect.GetComponent<ParticleSystem>();
             
-        fx.UpdateText(text);
+        fx.UpdateText(text, null, colors[1], colors[2], colors[0]);
         popTextEffect.SetActive(true);
         inUseText.Add(popTextEffect);
         ps.Play();
@@ -210,6 +211,7 @@ public enum VFXType
     killEffectPurple,
     killEffectBlue,
     killEffectYellow,
+    killEffectWhite,
     shieldBreakingEffect,
     BlueSpawningEffect,
     YelloSpawningEffect,

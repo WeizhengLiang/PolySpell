@@ -267,23 +267,30 @@ public class PlayerController : MonoBehaviour
                 if (scale.x >= 0.5f)
                 {
                     transform.localScale = scale;  // Bob shrinks in size
-                    StartCoroutine(VFXManager.Instance.SpawnTextVFX("Size Down!", transform.position));
+                    StartCoroutine(VFXManager.Instance.SpawnTextVFX("Size Down!", ColorCombo.Hex2Color(ColorCombo.RegularText_3),transform.position));
                 }
                 else
                 {
                     transform.localScale = new Vector3(0.5f, 0.5f, 1f);
-                    StartCoroutine(VFXManager.Instance.SpawnTextVFX("Min Size!", transform.position));
+                    StartCoroutine(VFXManager.Instance.SpawnTextVFX("Min Size!", ColorCombo.Hex2Color(ColorCombo.RegularText_3),transform.position));
                 }
+                
+                // StartCoroutine(VFXManager.Instance.SpawnTextVFX($"+{5}", ColorCombo.Hex2Color(ColorCombo.AddYellowScore_3), normalBall.transform.position));
                 _trailRenderer.startWidth = transform.localScale.x;
 
-                // DisplayNotification("Size Down!", Color.yellow);
             }
             else if (normalBall.powerUp == NormalBall.PowerUpType.Speed)
             {
-                StartCoroutine(VFXManager.Instance.SpawnTextVFX("Speed Up!", transform.position));
+                // StartCoroutine(VFXManager.Instance.SpawnTextVFX($"+{5}", ColorCombo.Hex2Color(ColorCombo.AddPurpleScore_3), normalBall.transform.position));
+                StartCoroutine(VFXManager.Instance.SpawnTextVFX("Speed Up!", ColorCombo.Hex2Color(ColorCombo.RegularText_3),transform.position));
                 // rb.velocity *= 1.5f;  // Bob gains speed
                 shootForce *= 1.15f;
-                // DisplayNotification("Speed Up!", Color.blue);
+            }else if(normalBall.powerUp == NormalBall.PowerUpType.None)
+            {
+                StartCoroutine(VFXManager.Instance.SpawnTextVFX($"+{1}", ColorCombo.Hex2Color(ColorCombo.AddNormalScore_3), normalBall.transform.position));
+            }else if (normalBall.powerUp == NormalBall.PowerUpType.Trail)
+            {
+                
             }
             
             normalBall.TriggerDieVFX(col.transform.position);
@@ -319,6 +326,7 @@ public class PlayerController : MonoBehaviour
         if (col.gameObject.CompareTag("EvilBall"))
         {
             Vector2 contactPoint = col.contacts[0].point;
+            StartCoroutine(VFXManager.Instance.SpawnTextVFX($"-{10}", ColorCombo.Hex2Color(ColorCombo.DamageText_3), transform.position));
             VFXManager.Instance.SpawnVFX(VFXType.hitEffect ,VFXManager.Instance.hitEffectPrefab, contactPoint);
             HealthSystem.TakeDamage(10f);  // Adjust damage value as necessary
             // DisplayNotification("-10", Color.red);
@@ -385,7 +393,7 @@ public class PlayerController : MonoBehaviour
             Vector2 start = extraSegmentStartPositions[index];
             Vector2 end = extraSegmentEndPositions[index];
             Vector2 spawnPosition = Vector2.Lerp(start, end, Random.Range(0f, 1f));
-            StartCoroutine(BallSpawner.SpawnNormalBallWithAnimation(spawnPosition));
+            StartCoroutine(BallSpawner.SpawnNormalBallWithAnimation(spawnPosition, true));
         }
     }
     
@@ -405,7 +413,7 @@ public class PlayerController : MonoBehaviour
         for (int i = 0; i < numberOfBalls; i++)
         {
             Vector2 spawnPosition = Vector2.Lerp(segmentStartPositions[i % segmentStartPositions.Count], segmentEndPositions[i % segmentEndPositions.Count], Random.Range(0f, 1f));
-            StartCoroutine(BallSpawner.SpawnNormalBallWithAnimation(spawnPosition));
+            StartCoroutine(BallSpawner.SpawnNormalBallWithAnimation(spawnPosition, true));
         }
     }
     
@@ -513,7 +521,7 @@ public class PlayerController : MonoBehaviour
             {
                 float remainingDistance = interval - distanceCovered;
                 Vector3 spawnPosition = Vector3.Lerp(lastPosition, currentPosition, remainingDistance / segmentLength);
-                StartCoroutine(BallSpawner.SpawnNormalBallWithAnimation(spawnPosition));
+                StartCoroutine(BallSpawner.SpawnNormalBallWithAnimation(spawnPosition, true));
                 distanceCovered = 0f;
                 segmentLength -= remainingDistance;
                 lastPosition = spawnPosition;
