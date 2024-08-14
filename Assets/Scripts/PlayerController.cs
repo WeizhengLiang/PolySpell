@@ -115,7 +115,7 @@ public class PlayerController : MonoBehaviour
                     {
                         HealPlayer();  // changed: Handle healing Bob
                     }
-                    else if (polygonType == -1)  // Check for invalid polygon
+                    else if (polygonType > 5)  // Check for invalid polygon
                     {
                         TransformTraitIntoNormalBalls();  // Transform trait into normal balls
                     }
@@ -187,7 +187,7 @@ public class PlayerController : MonoBehaviour
         {
             return 5;  // Pentagon
         }
-        return -1;  // Undefined or invalid polygon
+        return edgeCount + 1;  // Undefined or invalid polygon
     }
 
     string GetPolygonType(int sides)
@@ -361,7 +361,7 @@ public class PlayerController : MonoBehaviour
             case 3: return Color.red;         // Triangle
             case 4: return Color.blue;       // Quadrilateral
             case 5: return Color.green;        // Pentagon
-            default: return Color.white;      // Default
+            default: return Color.gray;      // Default
         }
     }
     

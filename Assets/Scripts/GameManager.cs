@@ -102,6 +102,7 @@ public class GameManager : MonoBehaviour
     {
         playerController.HealthSystem.onHealthZero += EndGame;  // Subscribe to the health zero event
         ShowMainMenu();
+        BGMManager.Instance.PlayBGM();
     }
     
     void OnDestroy()
@@ -380,6 +381,9 @@ public class GameManager : MonoBehaviour
         bgmOn.SetActive(become == 1);
         bgmOff.SetActive(become == 0);
         PlayerPrefsManager.Instance.SaveInt(PlayerPrefsKeys.BgmOn, become);
+        
+        if(become == 0) BGMManager.Instance.StopBGM();
+        if(become == 1) BGMManager.Instance.ResumeBGM();
     }
     
     private void OnClickSfxToggle()
