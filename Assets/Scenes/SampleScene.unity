@@ -17294,6 +17294,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bgmSource: {fileID: 1891480924}
   SlowMotionManager: {fileID: 388705053}
+  pitchTransitionSpeed: 0.5
 --- !u!1 &1900263243
 GameObject:
   m_ObjectHideFlags: 0
