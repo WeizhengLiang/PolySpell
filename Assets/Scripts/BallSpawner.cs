@@ -21,18 +21,20 @@ public class BallSpawner : MonoBehaviour
 
     public IEnumerator SpawnNormalBallWithAnimation(Vector2 position, bool fromTrait = false)
     {
-        var sparkle = VFXManager.Instance.SpawnVFX(VFXType.BlueSpawningEffect ,VFXManager.Instance.BlueSpawningEffectPrefab, position);
-        yield return new WaitForSeconds(1.5f);  // Duration of the sparkle animation
+        var ball = SpawnNormalBall(position, fromTrait);
+        var sparkle = ball.GetComponent<NormalBall>().TriggerSpawnVFX(position);
+        // var sparkle = VFXManager.Instance.SpawnVFX(VFXType.BlueSpawningEffect ,VFXManager.Instance.BlueSpawningEffectPrefab, position);
+        yield return new WaitForSeconds(1f);  // Duration of the sparkle animation
         VFXManager.Instance.DeActivate(sparkle);
-
-        SpawnNormalBall(position, fromTrait);
+        
+        ball.SetActive(true);
     }
 
     public IEnumerator SpawnEvilBallWithAnimation(Vector2 position)
     {
         // GameObject sparkle = Instantiate(evilBallSparklePrefab, position, Quaternion.identity);
         var sparkle = VFXManager.Instance.SpawnVFX(VFXType.RedSpawningEffect ,VFXManager.Instance.RedSpawningEffectPrefab, position);
-        yield return new WaitForSeconds(1.5f);  // Duration of the sparkle animation
+        yield return new WaitForSeconds(1f);  // Duration of the sparkle animation
         VFXManager.Instance.DeActivate(sparkle);
 
         SpawnEvilBall(position);
@@ -47,11 +49,13 @@ public class BallSpawner : MonoBehaviour
         }
     }
     
-    public void SpawnNormalBall(Vector2 spawnPosition, bool fromTrait = false)
+    public GameObject SpawnNormalBall(Vector2 spawnPosition, bool fromTrait = false)
     {
         GameObject ball = normalBallPool.GetObject();
         ball.transform.position = spawnPosition;
         ball.GetComponent<NormalBall>().Initialize(fromTrait);
+        ball.SetActive(false);
+        return ball;
     }
     
     public void SpawnEvilBalls(int count)

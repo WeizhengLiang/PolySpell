@@ -1366,8 +1366,8 @@ ParticleSystem:
       maxColor: {r: 1, g: 1, b: 1, a: 1}
       maxGradient:
         serializedVersion: 2
-        key0: {r: 0, g: 0.46540874, b: 0.44744498, a: 0}
-        key1: {r: 0.5671056, g: 0.74213827, b: 0.7106456, a: 1}
+        key0: {r: 0.8039216, g: 0.8509804, b: 0.31764707, a: 0}
+        key1: {r: 0.83137256, g: 0.44313726, b: 0.3019608, a: 1}
         key2: {r: 0.76470584, g: 0.26737964, b: 1, a: 0}
         key3: {r: 1, g: 0.03424205, b: 0, a: 0.039215688}
         key4: {r: 1, g: 0.017601715, b: 0, a: 0.039215688}
@@ -4913,7 +4913,7 @@ GameObject:
   - component: {fileID: 5824670795371433375}
   - component: {fileID: 2990870103442498292}
   m_Layer: 0
-  m_Name: CFXR4 Bouncing Glows Bubble (DarkLight Blue)
+  m_Name: CFXR4 Bouncing Glows Bubble (yellow)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5093,8 +5093,8 @@ ParticleSystem:
       maxColor: {r: 0, g: 0.14117648, b: 0.41960785, a: 1}
       maxGradient:
         serializedVersion: 2
-        key0: {r: 0.47339892, g: 0.8050314, b: 0.7985919, a: 1}
-        key1: {r: 0.63781095, g: 0.7484276, b: 0.719318, a: 1}
+        key0: {r: 0.80462974, g: 0.8490566, b: 0.31639373, a: 1}
+        key1: {r: 0.8301887, g: 0.44266292, b: 0.30153078, a: 1}
         key2: {r: 0, g: 0, b: 0, a: 0}
         key3: {r: 0, g: 0, b: 0, a: 0}
         key4: {r: 0, g: 0, b: 0, a: 0}

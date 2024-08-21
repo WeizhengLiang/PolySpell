@@ -21,6 +21,7 @@ public class VFXManager : MonoBehaviour
     public GameObject BlueSpawningEffectPrefab;
     public GameObject YelloSpawningEffectPrefab;
     public GameObject PurpleSpawningEffectPrefab;
+    public GameObject WhiteSpawningEffectPrefab;
     public GameObject RedSpawningEffectPrefab;
     public GameObject EvilBallDieEffectPrefab;
     public GameObject PopTextEffectPrefab;
@@ -214,6 +215,7 @@ public enum VFXType
     killEffectWhite,
     shieldBreakingEffect,
     BlueSpawningEffect,
+    WhiteSpawningEffect,
     YelloSpawningEffect,
     PurpleSpawningEffect,
     RedSpawningEffect,

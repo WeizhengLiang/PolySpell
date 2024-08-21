@@ -7756,10 +7756,11 @@ MonoBehaviour:
   killEffectYellowPrefab: {fileID: 8771972552311404799, guid: 4ffbb85b910be4113a9643f5cded52b7, type: 3}
   killEffectWhitePrefab: {fileID: 8771972552311404799, guid: 9f82f9df45ef646c59441255ecdf3fd4, type: 3}
   shieldBreakingEffectPrefab: {fileID: 2708598583397607911, guid: 784c9fb3edfa448bbb416fc29ac3c932, type: 3}
-  BlueSpawningEffectPrefab: {fileID: 5824670795371433373, guid: e78a4389752344c33ac3da783c248ad8, type: 3}
-  YelloSpawningEffectPrefab: {fileID: 5824670795371433373, guid: 5ef7628bd4f7d4b989f73f37169f9a9d, type: 3}
-  PurpleSpawningEffectPrefab: {fileID: 5824670795371433373, guid: 89e66101f46654ceaae40efffe758427, type: 3}
-  RedSpawningEffectPrefab: {fileID: 5824670795371433373, guid: da4ae5644169c4ffd9075e4026d31706, type: 3}
+  BlueSpawningEffectPrefab: {fileID: 5824670795371433373, guid: c9eb49524695d403f9c66066da701147, type: 3}
+  YelloSpawningEffectPrefab: {fileID: 5824670795371433373, guid: c593aee978afa420cbd999b74a110134, type: 3}
+  PurpleSpawningEffectPrefab: {fileID: 5824670795371433373, guid: 5805829788da74c80ad61dbc0167e3d3, type: 3}
+  WhiteSpawningEffectPrefab: {fileID: 5824670795371433373, guid: e78a4389752344c33ac3da783c248ad8, type: 3}
+  RedSpawningEffectPrefab: {fileID: 5824670795371433373, guid: 37a35e9820d464865ad919ecf1440ce5, type: 3}
   EvilBallDieEffectPrefab: {fileID: 141433446842962269, guid: 9fe8f8b3288e45a44af36ff8aa04486e, type: 3}
   PopTextEffectPrefab: {fileID: 5339739117810204693, guid: 8a71b4961c3da4f2faaf77a2167df4f5, type: 3}
 --- !u!1 &742481419

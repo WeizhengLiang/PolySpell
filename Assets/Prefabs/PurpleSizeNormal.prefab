@@ -116,7 +116,7 @@ GameObject:
   - component: {fileID: 6948522024853435267}
   - component: {fileID: 7531334705620904387}
   m_Layer: 0
-  m_Name: Normal
+  m_Name: PurpleSizeNormal
   m_TagString: NormalBall
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -179,8 +179,8 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: -1901024941, guid: 6d3f1745135c14e44977270db3268b1c, type: 3}
-  m_Color: {r: 0, g: 0.7149544, b: 1, a: 1}
+  m_Sprite: {fileID: -728322691, guid: 6d3f1745135c14e44977270db3268b1c, type: 3}
+  m_Color: {r: 0.8780197, g: 0.41960788, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -266,11 +266,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   NormalBallPool: {fileID: 0}
   speed: 1
-  NormalBallPrefab: {fileID: -1901024941, guid: 6d3f1745135c14e44977270db3268b1c, type: 3}
-  SizeBallPrefab: {fileID: 425471123, guid: 6d3f1745135c14e44977270db3268b1c, type: 3}
-  SpeedBallPrefab: {fileID: -728322691, guid: 6d3f1745135c14e44977270db3268b1c, type: 3}
   powerUp: 0
-  spriteRenderer: {fileID: 7350771567464235555}
+  spriteRenderer: {fileID: 0}
   Text: {fileID: 5451134820702207972}
 --- !u!1 &8615754947798109049
 GameObject:
