@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 using Kalkatos.DottedArrow;
 using Random = UnityEngine.Random;
 
@@ -32,6 +33,8 @@ public class PlayerController : MonoBehaviour
     private Vector2 currentDirection;
     private Dictionary<Vector2, (float, int)> intersectionResults = new ();
     private bool isNewPoly;
+    private float TimeEnergyRunOut = -1f;
+    private bool afterEnergyDrained;
 
     private void Awake()
     {
@@ -60,6 +63,12 @@ public class PlayerController : MonoBehaviour
         
         if (Input.GetMouseButtonUp(0) && GameManager.gameUI.activeSelf && SlowMotionManager.inSlowMotion && !GameManager.IsPaused)
         {
+            // if (segmentEndPositions.Count != 0)
+            // {
+            //     var tem = IsPointInTrail(_trailRenderer, segmentEndPositions[^1]);   
+            //     Debug.LogWarning(tem);
+            // }
+            
             Arrow.Deactivate();
             if (!EnergySystem.IsEnergyEmpty)
             {
@@ -137,16 +146,76 @@ public class PlayerController : MonoBehaviour
             energyConsumedForCurrentTrait += energyCost;
             if (!EnergySystem.ConsumeEnergy(energyCost))
             {
+                // Plan A
                 // Stop moving and disable the trail renderer when out of energy
                 if (_trailRenderer.positionCount > 0)
                 {
-                    ClearTrailAndSpawnBalls();
+                    // ClearTrailAndSpawnBalls();
+                    ClearTrailAndRestoreEnergy();
                 }
                 ClearData();
                 isMoving = false;
                 isNewPoly = true;
+
+                // // Plan B
+                // _trailRenderer.time = 1f;
+                //
+                // // get the visible trail points of trail renderer
+                // var positionList = new Vector3[_trailRenderer.positionCount];
+                // _trailRenderer.GetVisiblePositions(positionList);
+                //
+                // // get polygon points that on the trail
+                // var endIndexThatStillVisible = -1;
+                // for (int i = 0; i < segmentEndPositions.Count; i++)
+                // {
+                //     if (IsPointInTrail(_trailRenderer,
+                //             new Vector3(segmentEndPositions[i].x, segmentEndPositions[i].y, 1f)))
+                //     {
+                //         endIndexThatStillVisible = i;
+                //         break;
+                //     }
+                // }
+                //
+                // // remove the polygon points that are not on the trail
+                // if (endIndexThatStillVisible != -1)
+                // {
+                //     for (int i = endIndexThatStillVisible; i >= 0; i--)
+                //     {
+                //         //remove vertises that should not be visible
+                //         segmentEndPositions.RemoveAt(i);
+                //         segmentStartPositions.RemoveAt(i);
+                //     }
+                // }
+                //
+                // // renew the first start polygon point to the new tail tip
+                // segmentStartPositions[0] = new Vector2(positionList[0].x, positionList[0].y);
+                // afterEnergyDrained = true;
+                // CalculatePotentialIntersections(transform.position, currentDirection);
+                //
+                
+            }
+            else
+            {
+                // stop trail from fading out
+                _trailRenderer.time = 50f;
             }
         }
+    }
+    
+    public bool IsPointInTrail(TrailRenderer trailRenderer, Vector3 point, float tolerance = 0.1f)
+    {
+        int positionCount = trailRenderer.positionCount;
+        Vector3[] positions = new Vector3[positionCount];
+        trailRenderer.GetPositions(positions);
+
+        for (int i = 0; i < positionCount; i++)
+        {
+            if (Vector3.Distance(positions[i], point) <= tolerance)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     void ClearData()
@@ -530,6 +599,22 @@ public class PlayerController : MonoBehaviour
             lastPosition = currentPosition;
         }
         
+        // Clear the trail renderer
+        _trailRenderer.Clear();
+        _trailRenderer.enabled = false;
+    }
+    
+    private void ClearTrailAndRestoreEnergy()
+    {
+        // Calculate the total length of the trail
+        float trailLength = CalculateTrailLength();
+
+        // Calculate the amount of energy to restore based on trail length
+        float energyRestored = trailLength * EnergySystem.energyConsumptionRate;
+
+        // Restore energy
+        EnergySystem.GainEnergy(energyRestored);
+
         // Clear the trail renderer
         _trailRenderer.Clear();
         _trailRenderer.enabled = false;
