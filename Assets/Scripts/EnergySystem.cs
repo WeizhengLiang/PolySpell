@@ -1,34 +1,28 @@
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class EnergySystem : MonoBehaviour
 {
-    public Slider energyBar;
-    public Image energyCircle;
+    [SerializeField] private Slider energyBar;
+    [SerializeField] private Image energyCircle;
 
-    private float maxEnergy = 100f;
-    public float energyConsumptionRate = 0.5f;  // Energy consumed per second while drawing
-    public float energyGainAmount = 10f;  // Energy gained by killing a normal ball
+    [Header("Energy Settings")]
+    [SerializeField] private float maxEnergy = 100f;
+    [SerializeField] private float energyConsumptionRate = 0.5f;
+    [SerializeField] private float energyGainAmount = 10f;
+
     private float currentEnergy;
+    private float consumedEnergy;
 
-    void Start()
-    {
-        currentEnergy = maxEnergy;
-        UpdateEnergyBar();
-    }
+    public float CurrentEnergy => currentEnergy;
+    public float MaxEnergy => maxEnergy;
+    public float EnergyConsumptionRate => energyConsumptionRate;
+    public float EnergyGainAmount => energyGainAmount;
+    public bool IsEnergyEmpty => currentEnergy < energyConsumptionRate;
 
-    void Update()
+    private void Start()
     {
-        if (currentEnergy <= 0)
-        {
-            currentEnergy = 0;
-            UpdateEnergyBar();
-            // if (trailRenderer.positionCount > 0)
-            // {
-            //     ClearTrailAndSpawnBalls();
-            // }
-        }
+        ResetEnergy();
     }
 
     public bool ConsumeEnergy(float amount)
@@ -36,6 +30,7 @@ public class EnergySystem : MonoBehaviour
         if (currentEnergy >= amount)
         {
             currentEnergy -= amount;
+            consumedEnergy += amount;
             UpdateEnergyBar();
             return true;
         }
@@ -48,17 +43,26 @@ public class EnergySystem : MonoBehaviour
         UpdateEnergyBar();
     }
 
-    private void UpdateEnergyBar()
-    {
-        energyCircle.fillAmount = currentEnergy / maxEnergy;
-        energyBar.value = currentEnergy / maxEnergy;
-    }
-
     public void ResetEnergy()
     {
         currentEnergy = maxEnergy;
+        consumedEnergy = 0f;
         UpdateEnergyBar();
     }
 
-    public bool IsEnergyEmpty => currentEnergy < energyConsumptionRate;
+    public float GetConsumedEnergy()
+    {
+        float temp = consumedEnergy;
+        consumedEnergy = 0f;
+        return temp;
+    }
+
+    private void UpdateEnergyBar()
+    {
+        if (energyCircle != null)
+            energyCircle.fillAmount = currentEnergy / maxEnergy;
+        
+        if (energyBar != null)
+            energyBar.value = currentEnergy / maxEnergy;
+    }
 }

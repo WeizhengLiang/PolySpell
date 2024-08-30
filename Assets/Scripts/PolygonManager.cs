@@ -24,13 +24,14 @@ public class PolygonManager
         PolygonEnergy = energy;
     }
 
-    public List<Vector2> GetPolygonPoints(Vector2 intersectionPoint, int polygonEdgesCount)
+    public List<Vector2> GetPolygonPoints(Vector2 intersectionPoint, int polygonType)
     {
-        List<Vector2> polygonPoints = new List<Vector2> { intersectionPoint };
-        for (int i = SegmentEndPositions.Count - 1; i >= SegmentEndPositions.Count - polygonEdgesCount + 1; i--)
+        List<Vector2> points = new List<Vector2> { intersectionPoint };
+        int startIndex = SegmentStartPositions.Count - polygonType + 1;
+        for (int i = startIndex; i < SegmentStartPositions.Count; i++)
         {
-            polygonPoints.Add(SegmentEndPositions[i]);
+            points.Add(SegmentEndPositions[i]);
         }
-        return polygonPoints;
+        return points;
     }
 }

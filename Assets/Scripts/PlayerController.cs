@@ -1,6 +1,5 @@
 using UnityEngine;
 using System.Collections.Generic;
-using System.Linq;
 using Kalkatos.DottedArrow;
 using Random = UnityEngine.Random;
 
@@ -11,7 +10,7 @@ public class PlayerController : MonoBehaviour
     public HealthSystem HealthSystem;
     public ScoringSystem ScoringSystem;
     public SlowMotionManager SlowMotionManager;
-    public GameObject polygonVisualizerPrefab;
+    [SerializeField] private GameObject polygonVisualizerPrefab;
     public GameObject Marker;
     public GameObject Marker2;
     public GameObject notificationDisplayPrefab;
@@ -20,13 +19,13 @@ public class PlayerController : MonoBehaviour
 
     private MovementController movementController;
     private PolygonManager polygonManager;
+    private PolygonHandler polygonHandler;
     private float energyConsumedForCurrentTrait = 0f;
     private Vector2 lastPosition;
-    private bool isMoving = false;
     private Rigidbody2D rb;
     private TrailRenderer _trailRenderer;
-    private Dictionary<Vector2, (float, int)> intersectionResults = new ();
-    private bool isNewPolygon;
+    private Dictionary<Vector2, (float, int)> intersectionResults = new();
+    private bool isNewPolygon = true;
     private float timeEnergyRunOut = -1f;
     private bool afterEnergyDrained;
 
@@ -36,12 +35,12 @@ public class PlayerController : MonoBehaviour
         _trailRenderer = GetComponent<TrailRenderer>();
         movementController = new MovementController(rb);
         polygonManager = new PolygonManager();
+        polygonHandler = new PolygonHandler(polygonManager, EnergySystem, HealthSystem, ScoringSystem, BallSpawner, polygonVisualizerPrefab);
     }
 
     void Start()
     {
         lastPosition = transform.position;
-        isNewPolygon = true;
     }
 
     void Update()
@@ -63,16 +62,6 @@ public class PlayerController : MonoBehaviour
         if (Input.GetMouseButtonUp(0) && GameManager.gameUI.activeSelf && SlowMotionManager.inSlowMotion && !GameManager.IsPaused)
         {
             Arrow.Deactivate();
-            if (!EnergySystem.IsEnergyEmpty)
-            {
-                if (isNewPolygon)
-                {
-                    lastPosition = transform.position;
-                    isNewPolygon = false;
-                }
-                _trailRenderer.enabled = true;
-            }
-            
             SlowMotionManager.ExitSlowMotion();
 
             rb.velocity = Vector2.zero;
@@ -83,22 +72,28 @@ public class PlayerController : MonoBehaviour
 
             if (!EnergySystem.IsEnergyEmpty)
             {
+                if (isNewPolygon)
+                {
+                    lastPosition = transform.position;
+                    isNewPolygon = false;
+                }
+                _trailRenderer.enabled = true;
+
                 if (lastPosition != currentPosition)
                 {
                     float distance = Vector2.Distance(lastPosition, currentPosition);
-                    energyConsumedForCurrentTrait += distance * EnergySystem.energyConsumptionRate;
+                    energyConsumedForCurrentTrait += distance * EnergySystem.EnergyConsumptionRate;
                     polygonManager.AddSegment(lastPosition, currentPosition);
                 }
                 lastPosition = currentPosition;
                 CalculatePotentialIntersections(lastPosition, movementController.CurrentDirection);
-                isMoving = true;
             }
         }
     }
 
     private void HandleMovement(Vector2 currentPosition)
     {
-        if (isMoving)
+        if (_trailRenderer.enabled)
         {
             float currentLength = Vector2.Distance(lastPosition, currentPosition);
             foreach (var keyValuePair in intersectionResults)
@@ -107,36 +102,15 @@ public class PlayerController : MonoBehaviour
                 {
                     int polygonType = keyValuePair.Value.Item2;
                     var startEndTrailPoint = keyValuePair.Key;
-                    Debug.Log($"{GetPolygonType(polygonType)} formed");
-                    polygonManager.SetPolygonEnergy(energyConsumedForCurrentTrait);
-                    ShowPolygon(keyValuePair.Key, polygonType);
-                    if (polygonType == 4)
-                    {
-                        BreakEvilBallsInsidePolygon(startEndTrailPoint);
-                    }
-                    else if (polygonType == 5)
-                    {
-                        HealPlayer();
-                    }
-                    else if (polygonType > 5)
-                    {
-                        TransformTraitIntoNormalBalls();
-                    }
-                    else
-                    {
-                        KillBallsInsidePolygon(startEndTrailPoint);
-                    }
-                    if(polygonType != -1) 
-                        TransformExtraTraitIntoNormalBalls(startEndTrailPoint, polygonType);
+                    polygonHandler.HandlePolygonFormation(startEndTrailPoint, polygonType);
                     ClearData();
                     _trailRenderer.Clear();
                     _trailRenderer.enabled = false;
-                    isMoving = false;
                     isNewPolygon = true;
                     break;
                 }
             }
-            float energyCost = EnergySystem.energyConsumptionRate * currentLength * Time.deltaTime;
+            float energyCost = EnergySystem.EnergyConsumptionRate * currentLength * Time.deltaTime;
             energyConsumedForCurrentTrait += energyCost;
             if (!EnergySystem.ConsumeEnergy(energyCost))
             {
@@ -145,7 +119,7 @@ public class PlayerController : MonoBehaviour
                     ClearTrailAndRestoreEnergy();
                 }
                 ClearData();
-                isMoving = false;
+                _trailRenderer.enabled = false;
                 isNewPolygon = true;
             }
             else
@@ -175,6 +149,7 @@ public class PlayerController : MonoBehaviour
     {
         polygonManager.ClearSegments();
         energyConsumedForCurrentTrait = 0f;
+        intersectionResults.Clear();
     }
 
     void CalculatePotentialIntersections(Vector2 start, Vector2 direction)
@@ -286,7 +261,7 @@ public class PlayerController : MonoBehaviour
             normalBall.TriggerDieVFX(col.transform.position);
             
             BallSpawner.normalBallPool.ReturnObject(col.gameObject);
-            EnergySystem.GainEnergy(EnergySystem.energyGainAmount);
+            EnergySystem.GainEnergy(EnergySystem.EnergyGainAmount);
             ScoringSystem.AddScore(1);
         }
     }
@@ -318,13 +293,13 @@ public class PlayerController : MonoBehaviour
         var normal = col.contacts[0].normal;
         movementController.Bounce(normal);
         
-        if (isMoving)
+        if (_trailRenderer.enabled)
         {
             Vector2 currentPosition = transform.position;
             if (lastPosition != currentPosition)
             {
                 float distance = Vector2.Distance(lastPosition, currentPosition);
-                energyConsumedForCurrentTrait += distance * EnergySystem.energyConsumptionRate;
+                energyConsumedForCurrentTrait += distance * EnergySystem.EnergyConsumptionRate;
                 polygonManager.AddSegment(lastPosition, currentPosition);
                 lastPosition = currentPosition;
                 CalculatePotentialIntersections(lastPosition, movementController.CurrentDirection);
@@ -335,154 +310,15 @@ public class PlayerController : MonoBehaviour
         {
             Vector2 contactPoint = col.contacts[0].point;
             StartCoroutine(VFXManager.Instance.SpawnTextVFX($"-{10}", ColorCombo.Hex2Color(ColorCombo.DamageText_3), transform.position));
-            VFXManager.Instance.SpawnVFX(VFXType.hitEffect ,VFXManager.Instance.hitEffectPrefab, contactPoint);
+            VFXManager.Instance.SpawnVFX(VFXType.hitEffect, VFXManager.Instance.hitEffectPrefab, contactPoint);
             HealthSystem.TakeDamage(10f);
         }
     }
-    
-    void ShowPolygon(Vector2 intersectionPoint, int polygonEdgesCount)
-    {
-        if(polygonEdgesCount < 3) return;
-        
-        List<Vector2> polygonPoints = polygonManager.GetPolygonPoints(intersectionPoint, polygonEdgesCount);
-        Color polygonColor = GetPolygonColor(polygonPoints.Count);
 
-        GameObject polygonVisualizer = Instantiate(polygonVisualizerPrefab, Vector3.zero, Quaternion.identity);
-        polygonVisualizer.GetComponent<PolygonVisualizer>().SetPoints(polygonPoints, polygonColor);
-    }
-    
-    Color GetPolygonColor(int sides)
-    {
-        switch (sides)
-        {
-            case 3: return Color.red;
-            case 4: return Color.blue;
-            case 5: return Color.green;
-            default: return Color.gray;
-        }
-    }
-    
-    void TransformExtraTraitIntoNormalBalls(Vector2 intersectionPoint, int polygonEdgesCount)
-    {
-        List<Vector2> extraSegmentStartPositions = new List<Vector2>();
-        List<Vector2> extraSegmentEndPositions = new List<Vector2>();
-        
-        var extraSegmentsCount = polygonManager.SegmentStartPositions.Count - polygonEdgesCount + 1;
-        
-        for (int i = 0; i < extraSegmentsCount; i++)
-        {
-            extraSegmentStartPositions.Add(polygonManager.SegmentStartPositions[i]);
-            extraSegmentEndPositions.Add(polygonManager.SegmentEndPositions[i]);
-        }
-        
-        extraSegmentStartPositions.Add(polygonManager.SegmentStartPositions[extraSegmentsCount]);
-        extraSegmentEndPositions.Add(intersectionPoint);
-        
-        float extraLength = CalculateTotalLength(extraSegmentStartPositions, extraSegmentEndPositions);
-        int numberOfBalls = Mathf.CeilToInt(extraLength * EnergySystem.energyConsumptionRate / 10f);
-
-        for (int i = 0; i < numberOfBalls; i++)
-        {
-            int index = i % extraSegmentStartPositions.Count;
-            Vector2 start = extraSegmentStartPositions[index];
-            Vector2 end = extraSegmentEndPositions[index];
-            Vector2 spawnPosition = Vector2.Lerp(start, end, Random.Range(0f, 1f));
-            StartCoroutine(BallSpawner.SpawnNormalBallWithAnimation(spawnPosition, true));
-        }
-    }
-    
-    float CalculateTotalLength(List<Vector2> startPositions, List<Vector2> endPositions)
-    {
-        float totalLength = 0f;
-        for (int i = 0; i < startPositions.Count; i++)
-        {
-            totalLength += Vector2.Distance(startPositions[i], endPositions[i]);
-        }
-        return totalLength;
-    }
-    
-    void TransformTraitIntoNormalBalls()
-    {
-        int numberOfBalls = Mathf.CeilToInt(polygonManager.PolygonEnergy / 10f);
-        for (int i = 0; i < numberOfBalls; i++)
-        {
-            Vector2 spawnPosition = Vector2.Lerp(polygonManager.SegmentStartPositions[i % polygonManager.SegmentStartPositions.Count], 
-                                                 polygonManager.SegmentEndPositions[i % polygonManager.SegmentEndPositions.Count], 
-                                                 Random.Range(0f, 1f));
-            StartCoroutine(BallSpawner.SpawnNormalBallWithAnimation(spawnPosition, true));
-        }
-    }
-    
-    void HealPlayer()
-    {
-        HealthSystem.Heal(polygonManager.PolygonEnergy);
-    }
-    
-    void BreakEvilBallsInsidePolygon(Vector2 startEndTrailPoint)
-    {
-        List<Vector2> polygonPoints = new List<Vector2> { startEndTrailPoint };
-        polygonPoints.AddRange(polygonManager.SegmentEndPositions);
-        polygonPoints.Add(startEndTrailPoint);
-
-        foreach (GameObject ball in BallSpawner.evilBallPool.activeObjList)
-        {
-            if (IsPointInPolygon(ball.transform.position, polygonPoints))
-            {
-                ball.GetComponent<EvilBall>().BreakShield();
-            }
-        }
-    }
-
-    void KillBallsInsidePolygon(Vector2 startEndTrailPoint)
-    {
-        List<Vector2> polygonPoints = new List<Vector2> { startEndTrailPoint };
-        polygonPoints.AddRange(polygonManager.SegmentEndPositions);
-        polygonPoints.Add(startEndTrailPoint);
-
-        for (int i = BallSpawner.normalBallPool.activeObjList.Count - 1; i >= 0; i--)
-        {
-            var ball = BallSpawner.normalBallPool.activeObjList[i];
-            if (IsPointInPolygon(ball.transform.position, polygonPoints))
-            {
-                BallSpawner.normalBallPool.ReturnObject(ball);
-                EnergySystem.GainEnergy(EnergySystem.energyGainAmount);
-                ScoringSystem.AddScore(1);
-            }
-        }
-
-        for (int i = BallSpawner.evilBallPool.activeObjList.Count - 1; i >= 0; i--)
-        {
-            var ball = BallSpawner.evilBallPool.activeObjList[i];
-            if (IsPointInPolygon(ball.transform.position, polygonPoints))
-            {
-                ball.GetComponent<EvilBall>().TakeDamage((int)polygonManager.PolygonEnergy);
-            }
-        }
-
-        energyConsumedForCurrentTrait = 0f;
-    }
-
-    bool IsPointInPolygon(Vector2 point, List<Vector2> polygonPoints)
-    {
-        int intersectCount = 0;
-        for (int i = 1; i < polygonPoints.Count; i++)
-        {
-            Vector2 v1 = polygonPoints[i];
-            Vector2 v2 = polygonPoints[i - 1];
-
-            if ((v1.y > point.y) != (v2.y > point.y) &&
-                (point.x < (v2.x - v1.x) * (point.y - v1.y) / (v2.y - v1.y) + v1.x))
-            {
-                intersectCount++;
-            }
-        }
-        return (intersectCount % 2) == 1;
-    }
-    
     private void ClearTrailAndRestoreEnergy()
     {
         float trailLength = CalculateTrailLength();
-        float energyRestored = trailLength * EnergySystem.energyConsumptionRate;
+        float energyRestored = trailLength * EnergySystem.EnergyConsumptionRate;
         EnergySystem.GainEnergy(energyRestored);
         _trailRenderer.Clear();
         _trailRenderer.enabled = false;
@@ -511,7 +347,6 @@ public class PlayerController : MonoBehaviour
         _trailRenderer.enabled = false;
         _trailRenderer.startWidth = 0.6f;
 
-        isMoving = false;
         isNewPolygon = true;
         energyConsumedForCurrentTrait = 0f;
         lastPosition = transform.position;

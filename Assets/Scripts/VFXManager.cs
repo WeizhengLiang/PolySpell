@@ -43,18 +43,30 @@ public class VFXManager : MonoBehaviour
 
     public void SpawnVFXWithFadeOut(VFXType type, GameObject prefab, Vector2 position, float fadeDuration = 1.5f)
     {
-        GameObject vfx;
-        VFX vfxStruct;
-        if (effectPool.Exists(x => x.type == type && x.inUse == false))
+        VFX vfxStruct = null;
+        
+        // 尝试找到一个可重用的VFX
+        for (int i = effectPool.Count - 1; i >= 0; i--)
         {
-            vfxStruct = effectPool.FirstOrDefault(x => x.type == type && x.inUse == false);
-            vfxStruct.go.transform.position = position;
-            vfxStruct.go.SetActive(true);
-            vfxStruct.inUse = true;
+            if (effectPool[i].type == type && !effectPool[i].inUse)
+            {
+                if (effectPool[i].go == null)
+                {
+                    // 如果GameObject已经被销毁，从池中移除它
+                    effectPool.RemoveAt(i);
+                }
+                else
+                {
+                    vfxStruct = effectPool[i];
+                    break;
+                }
+            }
         }
-        else
+
+        // 如果没有找到可重用的VFX，创建一个新的
+        if (vfxStruct == null)
         {
-            vfx = Instantiate(prefab, position, Quaternion.identity);
+            GameObject vfx = Instantiate(prefab, position, Quaternion.identity);
             vfxStruct = new VFX
             {
                 type = type,
@@ -63,6 +75,14 @@ public class VFXManager : MonoBehaviour
             };
             effectPool.Add(vfxStruct);
         }
+        else
+        {
+            // 重用现有的VFX
+            vfxStruct.go.transform.position = position;
+            vfxStruct.go.SetActive(true);
+            vfxStruct.inUse = true;
+        }
+
         StartCoroutine(FadeOutVFX(vfxStruct, fadeDuration));
     }
     
@@ -97,6 +117,11 @@ public class VFXManager : MonoBehaviour
     
     private IEnumerator FadeOutVFX(VFX vfxStruct, float fadeDuration)
     {
+        if (vfxStruct == null || vfxStruct.go == null)
+        {
+            yield break;
+        }
+
         var vfx = vfxStruct.go;
         
         ParticleSystem particleSystem = vfx.GetComponent<ParticleSystem>();
