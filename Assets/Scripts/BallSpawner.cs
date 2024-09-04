@@ -1,98 +1,255 @@
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 public class BallSpawner : MonoBehaviour
 {
-    public ObjectPool normalBallPool;
-    public ObjectPool evilBallPool;
-    public Transform playerTransform;  // Reference to the player's transform
-    
+    private static readonly WaitForSeconds WaitOneSecond = new WaitForSeconds(1f);
+
+    [System.Serializable]
+    public class BallTypeInfo
+    {
+        public BallType type;
+        public ObjectPool pool;
+        public int initialCount;
+        public float spawnWeight;
+    }
+
+    public enum BallType { Normal, Evil }
+
+    public List<BallTypeInfo> ballTypes;
+    [SerializeField] private Transform playerTransform;
+    [SerializeField] private Vector2 spawnAreaMin = new Vector2(-8f, -4.5f);
+    [SerializeField] private Vector2 spawnAreaMax = new Vector2(8f, 4.5f);
+    [SerializeField] private float initialSpawnInterval = 2f;
+    [SerializeField] private float minSpawnInterval = 0.5f;
+    [SerializeField] private float spawnIntervalDecreaseRate = 0.05f;
+
+    private float currentSpawnInterval;
+    private float spawnTimer;
+    private bool isSpawning = false;
+    private float difficultyFactor = 1f;
+
+    public event Action OnSpawningCompleted;
+
+    public void StartSpawning()
+    {
+        LogManager.Instance.Log("BallSpawner: StartSpawning called");
+        isSpawning = true;
+        currentSpawnInterval = initialSpawnInterval;
+        spawnTimer = 0f;
+        SpawnInitialBalls();
+    }
+
     public void StopSpawning()
     {
+        isSpawning = false;
         StopAllCoroutines();
     }
 
-    public void SpawnInitialBalls(int normalBallCount, int evilBallCount)
+    public void ResetSpawner()
     {
-        SpawnNormalBalls(normalBallCount);
-        SpawnEvilBalls(evilBallCount);
+        StopSpawning();
+        StopAllCoroutines();
+        ResetObjectPools();
+        difficultyFactor = 1f;
     }
 
-    public IEnumerator SpawnNormalBallWithAnimation(Vector2 position, bool fromTrait = false)
+    public void HandleSpawning()
     {
-        var ball = SpawnNormalBall(position, fromTrait);
-        var sparkle = ball.GetComponent<NormalBall>().TriggerSpawnVFX(position);
-        // var sparkle = VFXManager.Instance.SpawnVFX(VFXType.BlueSpawningEffect ,VFXManager.Instance.BlueSpawningEffectPrefab, position);
-        yield return new WaitForSeconds(1f);  // Duration of the sparkle animation
-        VFXManager.Instance.DeActivate(sparkle);
+        if (!isSpawning) return;
+
+        spawnTimer += Time.deltaTime;
+        if (spawnTimer >= currentSpawnInterval)
+        {
+            SpawnRandomBall();
+            spawnTimer = 0f;
+            IncreaseDifficulty();
+        }
+    }
+
+    private void SpawnInitialBalls()
+    {
+        foreach (var ballInfo in ballTypes)
+        {
+            for (int i = 0; i < ballInfo.initialCount; i++)
+            {
+                SpawnBall(ballInfo.type);
+            }
+        }
+    }
+
+    private void SpawnRandomBall()
+    {
+        float totalWeight = 0f;
+        foreach (var ballInfo in ballTypes)
+        {
+            totalWeight += ballInfo.spawnWeight * difficultyFactor;
+        }
+
+        float randomValue = UnityEngine.Random.Range(0f, totalWeight);
+        float currentWeight = 0f;
+
+        foreach (var ballInfo in ballTypes)
+        {
+            currentWeight += ballInfo.spawnWeight * difficultyFactor;
+            if (randomValue <= currentWeight)
+            {
+                SpawnBall(ballInfo.type);
+                return;
+            }
+        }
+    }
+
+    private void SpawnBall(BallType type)
+    {
+        Vector2 spawnPosition = GetRandomSpawnPosition();
+        BallTypeInfo ballInfo = ballTypes.Find(info => info.type == type);
         
-        ball.SetActive(true);
-    }
-
-    public IEnumerator SpawnEvilBallWithAnimation(Vector2 position)
-    {
-        // GameObject sparkle = Instantiate(evilBallSparklePrefab, position, Quaternion.identity);
-        var sparkle = VFXManager.Instance.SpawnVFX(VFXType.RedSpawningEffect ,VFXManager.Instance.RedSpawningEffectPrefab, position);
-        yield return new WaitForSeconds(1f);  // Duration of the sparkle animation
-        VFXManager.Instance.DeActivate(sparkle);
-
-        SpawnEvilBall(position);
-    }
-    
-    public void SpawnNormalBalls(int count)
-    {
-        for (int i = 0; i < count; i++)
+        if (ballInfo != null)
         {
-            Vector2 spawnPosition = new Vector2(Random.Range(-8f, 8f), Random.Range(-4.5f, 4.5f));
-            StartCoroutine(SpawnNormalBallWithAnimation(spawnPosition));
-        }
-    }
-    
-    public GameObject SpawnNormalBall(Vector2 spawnPosition, bool fromTrait = false)
-    {
-        GameObject ball = normalBallPool.GetObject();
-        ball.transform.position = spawnPosition;
-        ball.GetComponent<NormalBall>().Initialize(fromTrait);
-        ball.SetActive(false);
-        return ball;
-    }
-    
-    public void SpawnEvilBalls(int count)
-    {
-        for (int i = 0; i < count; i++)
-        {
-            Vector2 spawnPosition = new Vector2(Random.Range(-8f, 8f), Random.Range(-4.5f, 4.5f));
-            StartCoroutine(SpawnEvilBallWithAnimation(spawnPosition));
+            GameObject ball = ballInfo.pool.GetObject();
+            LogManager.Instance.Log($"BallSpawner: Spawning {type} ball at position {spawnPosition}");
+            ball.transform.position = spawnPosition;
+
+            switch (type)
+            {
+                case BallType.Normal:
+                    InitializeNormalBall(ball);
+                    break;
+                case BallType.Evil:
+                    InitializeEvilBall(ball);
+                    break;
+            }
+
+            StartCoroutine(SpawnBallWithAnimation(ball, spawnPosition, type));
         }
     }
 
-    public void SpawnEvilBall(Vector2 spawnPosition)
+    private void InitializeNormalBall(GameObject ball)
     {
-        GameObject ball = evilBallPool.GetObject();
-        ball.transform.position = spawnPosition;
-            
+        NormalBall normalBall = ball.GetComponent<NormalBall>();
+        if (normalBall != null)
+        {
+            normalBall.Initialize(false);  // 默认为系统生成
+        }
+    }
+
+    private void InitializeEvilBall(GameObject ball)
+    {
         EvilBall evilBall = ball.GetComponent<EvilBall>();
         if (evilBall != null)
         {
-            evilBall.player = playerTransform;  // Set the player reference
+            LogManager.Instance.Log($"BallSpawner: Initializing EvilBall. Player null: {playerTransform == null}");
+            evilBall.player = playerTransform;
+            evilBall.Initialize();
         }
-        
-        evilBall.Initialize();
     }
 
-    public void ResetObjectPools()
+    private IEnumerator SpawnBallWithAnimation(GameObject ball, Vector2 position, BallType type)
     {
-        for (int i = normalBallPool.activeObjList.Count - 1; i >= 0; i--)
+        ball.SetActive(false);
+        VFX vfx = null;
+
+        if (type == BallType.Normal)
         {
-            var ball = normalBallPool.activeObjList[i];
-            normalBallPool.ReturnObject(ball);
+            NormalBall normalBall = ball.GetComponent<NormalBall>();
+            if (normalBall != null)
+            {
+                vfx = normalBall.TriggerSpawnVFX(position);
+            }
+        }
+        else if (type == BallType.Evil)
+        {
+            vfx = VFXManager.Instance.SpawnVFX(VFXType.RedSpawningEffect, position);
         }
 
-        for (int i = evilBallPool.activeObjList.Count - 1; i >= 0; i--)
+        yield return WaitOneSecond;  
+
+        if (vfx != null)
         {
-            var ball = evilBallPool.activeObjList[i];
-            evilBallPool.ReturnObject(ball);
+            VFXManager.Instance.DeActivate(vfx);
+        }
+
+        ball.SetActive(true);
+
+        // 重新初始化 EvilBall
+        if (type == BallType.Evil)
+        {
+            EvilBall evilBall = ball.GetComponent<EvilBall>();
+            if (evilBall != null)
+            {
+                evilBall.player = playerTransform;
+                evilBall.Initialize();
+                LogManager.Instance.Log($"BallSpawner: Re-initialized EvilBall after animation. Player null: {playerTransform == null}");
+            }
+        }
+    }
+
+    private void IncreaseDifficulty()
+    {
+        currentSpawnInterval = Mathf.Max(currentSpawnInterval - spawnIntervalDecreaseRate, minSpawnInterval);
+        difficultyFactor += 0.05f;  // 每次生成后略微增加难度
+    }
+
+    public void AdjustDifficulty(float playerPerformance)
+    {
+        // 根据玩家表现调整难度
+        difficultyFactor = Mathf.Clamp(difficultyFactor * playerPerformance, 0.5f, 2f);
+    }
+
+    private Vector2 GetRandomSpawnPosition()
+    {
+        return new Vector2(
+            UnityEngine.Random.Range(spawnAreaMin.x, spawnAreaMax.x),
+            UnityEngine.Random.Range(spawnAreaMin.y, spawnAreaMax.y)
+        );
+    }
+
+    private void ResetObjectPools()
+    {
+        foreach (var ballInfo in ballTypes)
+        {
+            ballInfo.pool.ReturnAllObjects();
+        }
+    }
+
+    public void ConvertTrailToNormalBall(Vector2 position)
+    {
+        GameObject ball = ballTypes.Find(info => info.type == BallType.Normal).pool.GetObject();
+        ball.transform.position = position;
+        NormalBall normalBall = ball.GetComponent<NormalBall>();
+        if (normalBall != null)
+        {
+            normalBall.Initialize(true);  // 设置为由trail转化
+            StartCoroutine(SpawnBallWithAnimation(ball, position, BallType.Normal));
+        }
+    }
+
+    public void SetPlayerReference(Transform player)
+    {
+        LogManager.Instance.Log($"BallSpawner: Setting player reference. Player null: {player == null}");
+        playerTransform = player;
+        UpdateAllEvilBallsPlayerReference();
+    }
+
+    private void UpdateAllEvilBallsPlayerReference()
+    {
+        foreach (var ballInfo in ballTypes)
+        {
+            if (ballInfo.type == BallType.Evil)
+            {
+                foreach (var ball in ballInfo.pool.activeObjList)
+                {
+                    EvilBall evilBall = ball.GetComponent<EvilBall>();
+                    if (evilBall != null)
+                    {
+                        evilBall.player = playerTransform;
+                        LogManager.Instance.Log($"BallSpawner: Updated player reference for existing EvilBall");
+                    }
+                }
+            }
         }
     }
 }

@@ -1,15 +1,22 @@
 using UnityEngine;
-using UnityEngine.UI;
 
 public class HealthSystem : MonoBehaviour
 {
     public delegate void OnHealthZero();
     public event OnHealthZero onHealthZero;
     
-    public Slider healthBar;
-    public Image healthCircle;
     public float maxHealth = 100f;
     private float currentHealth;
+
+    private PlayerUI playerUI;
+
+    public float CurrentHealth => currentHealth;
+
+    public void Initialize(PlayerUI playerUI)
+    {
+        this.playerUI = playerUI;
+        ResetHealth();
+    }
 
     void Start()
     {
@@ -23,17 +30,16 @@ public class HealthSystem : MonoBehaviour
         if (currentHealth < 0)
         {
             currentHealth = 0;
-            // Handle Bob's death (if necessary)
-            onHealthZero?.Invoke();  // Notify listeners when health reaches zero
-            Debug.Log("Bob is dead");
+            onHealthZero?.Invoke();
+            Debug.Log("Player is dead");
         }
         UpdateHealthBar();
     }
 
     private void UpdateHealthBar()
     {
-        healthCircle.fillAmount = currentHealth / maxHealth;
-        healthBar.value = currentHealth / maxHealth;
+        if (playerUI != null)
+            playerUI.SetHealthUI(currentHealth, maxHealth);
     }
     
     public void ResetHealth()
@@ -42,10 +48,10 @@ public class HealthSystem : MonoBehaviour
         UpdateHealthBar();
     }
     
-    public void Heal(float amount)  // changed: New method to heal Bob
+    public void Heal(float amount)
     {
         currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
         UpdateHealthBar();
-        Debug.Log($"Bob heals {amount}");
+        Debug.Log($"Player heals {amount}");
     }
 }

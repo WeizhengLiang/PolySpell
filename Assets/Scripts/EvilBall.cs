@@ -4,63 +4,87 @@ using UnityEngine.Serialization;
 
 public class EvilBall : MonoBehaviour
 {
-    public Transform player;  // Reference to the player
+    public Transform player;
     public GameObject Shield;
     public ScoringSystem ScoringSystem;
-    [FormerlySerializedAs("minHealth")] public int minHealthRandom = 200;
-    [FormerlySerializedAs("maxHealth")] public int maxHealthRandom = 500;
+    [SerializeField] private int minHealthRandom = 200;
+    [SerializeField] private int maxHealthRandom = 500;
     public ObjectPool EvilBallPool;
     public float health = 100f;
     public TextMeshProUGUI healthText;
-    public float healthGainAmount = 10f;  // Amount of health gained by killing a normal ball
+    public float healthGainAmount = 10f;
 
     private Rigidbody2D rb;
-    private float baseSpeed = 2f;
+    [SerializeField] private float baseSpeed = 2f;
     private float maxHealth;
-    private bool hasShield = false;  // Shield status
-    private float shieldCooldown = 10f;  // Cooldown for gaining shield
-    private float shieldTimer = 0f;  // Timer for shield activation
+    private bool hasShield = false;
+    private float shieldCooldown = 10f;
+    private float shieldTimer = 0f;
 
-    void Start()
+    private static int instanceCounter = 0;
+    private int instanceId;
+
+    void Awake()
     {
+        instanceId = ++instanceCounter;
+        rb = GetComponent<Rigidbody2D>();
+        rb.isKinematic = false;
+        rb.gravityScale = 0;
+        LogManager.Instance.Log($"EvilBall {instanceId} Awake: Rigidbody2D initialized. IsKinematic: {rb.isKinematic}, GravityScale: {rb.gravityScale}");
+    }
+
+    private void OnEnable()
+    {
+        LogManager.Instance.Log($"EvilBall {instanceId} OnEnable");
         Initialize();
     }
     
     private void Update()
     {
-        // Move towards the player
+        LogManager.Instance.Log($"EvilBall {instanceId} Update: Base speed: {baseSpeed}, Player null: {player == null}");
         MoveTowardsPlayer();
         HandleShield();
     }
 
     public void Initialize()
     {
-        ScoringSystem = FindObjectOfType<ScoringSystem>();
-        rb = GetComponent<Rigidbody2D>();
+        LogManager.Instance.Log($"EvilBall {instanceId} Initialize: Start");
+        if (ScoringSystem == null)
+        {
+            ScoringSystem = FindObjectOfType<ScoringSystem>();
+        }
+        SetRandomHealth();
         UpdateHealthText();
         UpdateSize();
         Shield.SetActive(hasShield);
+        LogManager.Instance.Log($"EvilBall {instanceId} Initialize: End. Player null: {player == null}, Player position: {(player != null ? player.position.ToString() : "N/A")}");
     }
     
-    void MoveTowardsPlayer()
+    private void MoveTowardsPlayer()
     {
+        if (player == null)
+        {
+            LogManager.Instance.Log($"EvilBall {instanceId} MoveTowardsPlayer: Player reference is null!");
+            return;
+        }
+
         Vector2 direction = (player.position - transform.position).normalized;
-        transform.Translate(direction * baseSpeed * Time.deltaTime);
+        rb.velocity = direction * baseSpeed;
+        LogManager.Instance.Log($"EvilBall {instanceId} MoveTowardsPlayer: Direction: {direction}, Velocity: {rb.velocity}, Position: {transform.position}");
     }
 
     public void TakeDamage(int damage)
     {
         if (hasShield)
         {
-            Debug.Log("Shield absorbed damage");
-            return;  // Absorb the damage
+            LogManager.Instance.Log("Shield absorbed damage");
+            return;
         }
         health -= damage;
-        Debug.Log($"EvilBall takes {damage} damage");
         UpdateHealthText();
         if (health <= 0)
         {
-            VFXManager.Instance.SpawnVFX(VFXType.EvilBallDieEffect ,VFXManager.Instance.EvilBallDieEffectPrefab, transform.position);
+            VFXManager.Instance.SpawnVFX(VFXType.EvilBallDieEffect, transform.position);
             ScoringSystem.AddScore(Mathf.CeilToInt(maxHealth / 10));
             ReturnToPool();
         }
@@ -112,29 +136,21 @@ public class EvilBall : MonoBehaviour
     {
         if(hasShield) return;
         hasShield = true;
-        // Add visual indicator for shield (optional)
-        Shield.SetActive(hasShield);
-        Debug.Log("Shield activated");
+        Shield.SetActive(true);
     }
     
     public void BreakShield()
     {
-        if (!hasShield)
-        {
-            Debug.Log("no shield can be break");
-            return;
-        }
+        if (!hasShield) return;
         
-        VFXManager.Instance.SpawnVFXWithFadeOut(VFXType.shieldBreakingEffect ,VFXManager.Instance.shieldBreakingEffectPrefab, transform.position);
+        VFXManager.Instance.SpawnVFXWithFadeOut(VFXType.shieldBreakingEffect, transform.position);
         hasShield = false;
-        Shield.SetActive(hasShield);
-        Debug.Log("Shield broken");
-        
+        Shield.SetActive(false);
     }
 
     void UpdateSize()
     {
-        float scale = Mathf.Lerp(0.5f, 2f, health / maxHealthRandom);  // Adjust the size range as needed
+        float scale = Mathf.Lerp(0.5f, 2f, health / maxHealthRandom);
         transform.localScale = new Vector3(scale, scale, 1f);
     }
     
@@ -144,23 +160,29 @@ public class EvilBall : MonoBehaviour
         {
             NormalBall normalBall = col.gameObject.GetComponent<NormalBall>();
 
-            if (normalBall.powerUp == NormalBall.PowerUpType.Size)
+            switch (normalBall.powerUp)
             {
-                GainHealth(150f);  // Heal more for size power-up
-            }
-            else if (normalBall.powerUp == NormalBall.PowerUpType.Speed)
-            {
-                baseSpeed *= 1.5f;  // Evil ball gains speed
-                rb.velocity *= 1.2f;
+                case NormalBall.PowerUpType.Size:
+                    GainHealth(150f);
+                    break;
+                case NormalBall.PowerUpType.Speed:
+                    baseSpeed *= 1.5f;
+                    rb.velocity *= 1.2f;
+                    break;
             }
             
-            normalBall.ReturnToPool();  // Remove the normal ball
-            GainHealth(healthGainAmount);  // Gain health for the evil ball
+            normalBall.ReturnToPool();
+            GainHealth(healthGainAmount);
         }
     }
 
     private void ReturnToPool()
     {
         EvilBallPool.ReturnObject(gameObject);
+    }
+
+    private void OnDisable()
+    {
+        LogManager.Instance.Log($"EvilBall {instanceId} OnDisable: Ball disabled");
     }
 }

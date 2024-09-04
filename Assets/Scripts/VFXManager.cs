@@ -2,34 +2,25 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using CartoonFX;
-using Unity.Mathematics;
 using UnityEngine;
 
 public class VFXManager : MonoBehaviour
 {
     public static VFXManager Instance;
 
-    public List<VFX> effectPool = new List<VFX>();
+    [System.Serializable]
+    public class VFXPrefab
+    {
+        public VFXType type;
+        public GameObject prefab;
+    }
 
-    public GameObject hitEffectPrefab;
-    public GameObject killEffectPrefab;
-    public GameObject killEffectPurplePrefab;
-    public GameObject killEffectBluePrefab;
-    public GameObject killEffectYellowPrefab;
-    public GameObject killEffectWhitePrefab;
-    public GameObject shieldBreakingEffectPrefab;
-    public GameObject BlueSpawningEffectPrefab;
-    public GameObject YelloSpawningEffectPrefab;
-    public GameObject PurpleSpawningEffectPrefab;
-    public GameObject WhiteSpawningEffectPrefab;
-    public GameObject RedSpawningEffectPrefab;
-    public GameObject EvilBallDieEffectPrefab;
-    public GameObject PopTextEffectPrefab;
+    public List<VFXPrefab> vfxPrefabs;
 
-    private List<GameObject> inUseText = new ();
-    private Queue<GameObject> notUseText = new ();
+    private Dictionary<VFXType, Queue<VFX>> vfxPools = new Dictionary<VFXType, Queue<VFX>>();
+    private List<VFX> activeVFXs = new List<VFX>();
 
-    void Awake()
+    private void Awake()
     {
         if (Instance == null)
         {
@@ -39,187 +30,133 @@ public class VFXManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+
+        InitializePools();
     }
 
-    public void SpawnVFXWithFadeOut(VFXType type, GameObject prefab, Vector2 position, float fadeDuration = 1.5f)
+    private void InitializePools()
     {
-        VFX vfxStruct = null;
-        
-        // 尝试找到一个可重用的VFX
-        for (int i = effectPool.Count - 1; i >= 0; i--)
+        foreach (VFXPrefab vfxPrefab in vfxPrefabs)
         {
-            if (effectPool[i].type == type && !effectPool[i].inUse)
-            {
-                if (effectPool[i].go == null)
-                {
-                    // 如果GameObject已经被销毁，从池中移除它
-                    effectPool.RemoveAt(i);
-                }
-                else
-                {
-                    vfxStruct = effectPool[i];
-                    break;
-                }
-            }
+            vfxPools[vfxPrefab.type] = new Queue<VFX>();
         }
+    }
 
-        // 如果没有找到可重用的VFX，创建一个新的
-        if (vfxStruct == null)
+    public VFX SpawnVFX(VFXType type, Vector2 position)
+    {
+        VFX vfx = GetOrCreateVFX(type, position);
+        return vfx;
+    }
+
+    public void SpawnVFXWithFadeOut(VFXType type, Vector2 position, float fadeDuration = 1.5f)
+    {
+        VFX vfx = GetOrCreateVFX(type, position);
+        StartCoroutine(FadeOutVFX(vfx, fadeDuration));
+    }
+
+    private VFX GetOrCreateVFX(VFXType type, Vector2 position)
+    {
+        VFX vfx;
+        if (vfxPools[type].Count > 0)
         {
-            GameObject vfx = Instantiate(prefab, position, Quaternion.identity);
-            vfxStruct = new VFX
-            {
-                type = type,
-                go = vfx,
-                inUse = true
-            };
-            effectPool.Add(vfxStruct);
+            vfx = vfxPools[type].Dequeue();
+            vfx.go.transform.position = position;
+            vfx.go.SetActive(true);
         }
         else
         {
-            // 重用现有的VFX
-            vfxStruct.go.transform.position = position;
-            vfxStruct.go.SetActive(true);
-            vfxStruct.inUse = true;
+            GameObject prefab = vfxPrefabs.Find(p => p.type == type).prefab;
+            GameObject vfxObject = Instantiate(prefab, position, Quaternion.identity);
+            vfx = new VFX { type = type, go = vfxObject };
         }
-
-        StartCoroutine(FadeOutVFX(vfxStruct, fadeDuration));
+        vfx.inUse = true;
+        activeVFXs.Add(vfx);
+        return vfx;
     }
-    
-    public VFX SpawnVFX(VFXType type, GameObject prefab, Vector2 position)
+
+    private IEnumerator FadeOutVFX(VFX vfx, float fadeDuration)
     {
-        VFX vfxStruct;
-        if (effectPool.Exists(x => x.type == type && x.inUse == false))
+        if (vfx?.go == null || !vfx.go.activeInHierarchy) yield break;
+
+        ParticleSystem particleSystem = vfx.go.GetComponent<ParticleSystem>();
+        if (particleSystem == null || !particleSystem.isPlaying) yield break;
+
+        // 获取或添加 ColorOverLifetimeModule
+        ParticleSystem.ColorOverLifetimeModule colorOverLifetime = particleSystem.colorOverLifetime;
+        colorOverLifetime.enabled = true;
+
+        // 创建一个新的 Gradient 来实现淡出效果
+        Gradient gradient = new Gradient();
+        gradient.SetKeys(
+            new GradientColorKey[] { new GradientColorKey(Color.white, 0.0f), new GradientColorKey(Color.white, 1.0f) },
+            new GradientAlphaKey[] { new GradientAlphaKey(1.0f, 0.0f), new GradientAlphaKey(0.0f, 1.0f) }
+        );
+
+        // 应用 Gradient 到 ColorOverLifetimeModule
+        colorOverLifetime.color = gradient;
+
+        // 等待淡出持续时间
+        // fadeDuration = particleSystem.main.duration;
+        yield return new WaitForSeconds(fadeDuration);
+
+        if (vfx != null && vfx.go != null)
         {
-            vfxStruct = effectPool.FirstOrDefault(x => x.type == type && x.inUse == false);
-            if (vfxStruct.go == null)
-            {
-                
-            }
-
-            vfxStruct.go.transform.position = position;
-            vfxStruct.go.SetActive(true);
-            vfxStruct.inUse = true;
-        }
-        else
-        {
-            var vfx = Instantiate(prefab, position, Quaternion.identity);
-            vfxStruct = new VFX
-            {
-                type = type,
-                go = vfx,
-                inUse = true
-            };
-            effectPool.Add(vfxStruct);
-        }
-        return vfxStruct;
-    }
-    
-    private IEnumerator FadeOutVFX(VFX vfxStruct, float fadeDuration)
-    {
-        if (vfxStruct == null || vfxStruct.go == null)
-        {
-            yield break;
-        }
-
-        var vfx = vfxStruct.go;
-        
-        ParticleSystem particleSystem = vfx.GetComponent<ParticleSystem>();
-        if (particleSystem != null)
-        {
-            float fadeSpeed = 1.0f / fadeDuration;
-            float t = 0;
-            ParticleSystem.MainModule main = particleSystem.main;  // Get the main module once
-
-            // Get the initial start color from the main module
-            Color startColor = main.startColor.color;
-
-            while (t < 1)
-            {
-                t += Time.deltaTime * fadeSpeed;
-
-                // Lerp the alpha value of the start color
-                Color newColor = startColor;
-                newColor.a = Mathf.Lerp(startColor.a, 0, t);
-
-                // Apply the new color to the startColor property of the main module
-                if(particleSystem != null) main.startColor = new ParticleSystem.MinMaxGradient(newColor);
-
-                yield return null;
-            }
-
-            DeActivate(vfxStruct);
+            DeActivate(vfx);
         }
     }
 
     public IEnumerator SpawnTextVFX(string text, Color[] colors, Vector2 position)
     {
-        GameObject popTextEffect;
-        if (notUseText.Count == 0)
-        {
-            popTextEffect = Instantiate(PopTextEffectPrefab, position, quaternion.identity);
-            popTextEffect.SetActive(false);
-        }
-        else
-        {
-            popTextEffect = notUseText.Dequeue();
-            popTextEffect.transform.position = position;
-        }
-        var fx = popTextEffect.GetComponent<CFXR_ParticleText>();
-        var ps = popTextEffect.GetComponent<ParticleSystem>();
-            
+        VFX vfx = GetOrCreateVFX(VFXType.PopTextEffect, position);
+        vfx.inUse = true;
+        var fx = vfx.go.GetComponent<CFXR_ParticleText>();
+        var ps = vfx.go.GetComponent<ParticleSystem>();
+
         fx.UpdateText(text, null, colors[1], colors[2], colors[0]);
-        popTextEffect.SetActive(true);
-        inUseText.Add(popTextEffect);
         ps.Play();
 
-        while (!ps.isStopped)
-        {
-            yield return null;
-        }
-   
-        RecycleTextVFX(popTextEffect);
-    }
+        yield return new WaitUntil(() => ps.isStopped);
 
-    private void RecycleTextVFX(GameObject textVFX)
-    {
-        if (inUseText.Contains(textVFX) && !notUseText.Contains(textVFX))
-        {
-            notUseText.Enqueue(textVFX);
-            inUseText.Remove(textVFX);
-        }
-        else
-        {
-            Debug.LogWarning("textVFX incorrectly recycled");
-        }
+        DeActivate(vfx);
     }
 
     public void DeActivateAll()
     {
         StopAllCoroutines();
-        for (int i = 0; i < effectPool.Count; i++)
+        foreach (var vfx in activeVFXs.ToList())
         {
-            var fx = effectPool[i];
-            DeActivate(fx);
+            DeActivate(vfx);
         }
+        activeVFXs.Clear();
     }
-    
-    public void DeActivate(VFX fx)
+
+    public void DeActivate(VFX vfx)
     {
-        if (fx.go != null)
+        if (vfx?.go != null)
         {
-            fx.go.SetActive(false);
-            fx.inUse = false;
+            vfx.go.SetActive(false);
+            vfx.inUse = false;
+            vfxPools[vfx.type].Enqueue(vfx);
+            activeVFXs.Remove(vfx);
         }
     }
 
     private void OnDestroy()
     {
-        for (int i = effectPool.Count - 1; i >= 0; i--)
+        foreach (var vfx in activeVFXs)
         {
-            Destroy(effectPool[i].go);
+            Destroy(vfx.go);
         }
-        effectPool.Clear();
+        activeVFXs.Clear();
+
+        foreach (var pool in vfxPools.Values)
+        {
+            foreach (var vfx in pool)
+            {
+                Destroy(vfx.go);
+            }
+        }
+        vfxPools.Clear();
     }
 }
 

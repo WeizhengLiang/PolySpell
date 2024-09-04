@@ -60,6 +60,7 @@ public class PolygonHandler
         List<Vector2> polygonPoints = polygonManager.GetPolygonPoints(intersectionPoint, polygonType);
         Color polygonColor = GetPolygonColor(polygonType);
         GameObject polygonVisualizer = Object.Instantiate(polygonVisualizerPrefab, Vector3.zero, Quaternion.identity);
+        polygonManager.AddPolygonVisualizer(polygonVisualizer);
         polygonVisualizer.GetComponent<PolygonVisualizer>().SetPoints(polygonPoints, polygonColor);
     }
 
@@ -85,7 +86,7 @@ public class PolygonHandler
         for (int i = 0; i < normalBallsToSpawn; i++)
         {
             Vector2 spawnPosition = GetRandomPositionInsidePolygon();
-            ballSpawner.SpawnNormalBallWithAnimation(spawnPosition, true);
+            ballSpawner.ConvertTrailToNormalBall(spawnPosition);
         }
     }
 
@@ -97,7 +98,7 @@ public class PolygonHandler
         {
             if (ball.CompareTag("NormalBall"))
             {
-                ballSpawner.normalBallPool.ReturnObject(ball);
+                ballSpawner.ballTypes.Find(info => info.type == BallSpawner.BallType.Normal).pool.ReturnObject(ball);
                 energySystem.GainEnergy(energySystem.EnergyGainAmount);
                 scoringSystem.AddScore(1);
             }
@@ -133,13 +134,13 @@ public class PolygonHandler
             Vector2 start = extraSegmentStartPositions[index];
             Vector2 end = extraSegmentEndPositions[index];
             Vector2 spawnPosition = Vector2.Lerp(start, end, Random.Range(0f, 1f));
-            ballSpawner.SpawnNormalBallWithAnimation(spawnPosition, true);
+            ballSpawner.ConvertTrailToNormalBall(spawnPosition);
         }
     }
 
     private List<EvilBall> GetEvilBallsInsidePolygon(List<Vector2> polygonPoints)
     {
-        return ballSpawner.evilBallPool.activeObjList
+        return ballSpawner.ballTypes.Find(info => info.type == BallSpawner.BallType.Evil).pool.activeObjList
             .Select(ball => ball.GetComponent<EvilBall>())
             .Where(evilBall => IsPointInPolygon(evilBall.transform.position, polygonPoints))
             .ToList();
@@ -148,8 +149,10 @@ public class PolygonHandler
     private List<GameObject> GetBallsInsidePolygon(List<Vector2> polygonPoints)
     {
         List<GameObject> ballsInside = new List<GameObject>();
-        ballsInside.AddRange(ballSpawner.normalBallPool.activeObjList.Where(ball => IsPointInPolygon(ball.transform.position, polygonPoints)));
-        ballsInside.AddRange(ballSpawner.evilBallPool.activeObjList.Where(ball => IsPointInPolygon(ball.transform.position, polygonPoints)));
+        ballsInside.AddRange(ballSpawner.ballTypes.Find(info => info.type == BallSpawner.BallType.Normal).pool.activeObjList
+            .Where(ball => IsPointInPolygon(ball.transform.position, polygonPoints)));
+        ballsInside.AddRange(ballSpawner.ballTypes.Find(info => info.type == BallSpawner.BallType.Evil).pool.activeObjList
+            .Where(ball => IsPointInPolygon(ball.transform.position, polygonPoints)));
         return ballsInside;
     }
 

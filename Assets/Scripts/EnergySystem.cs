@@ -1,11 +1,7 @@
 using UnityEngine;
-using UnityEngine.UI;
 
 public class EnergySystem : MonoBehaviour
 {
-    [SerializeField] private Slider energyBar;
-    [SerializeField] private Image energyCircle;
-
     [Header("Energy Settings")]
     [SerializeField] private float maxEnergy = 100f;
     [SerializeField] private float energyConsumptionRate = 0.5f;
@@ -14,11 +10,19 @@ public class EnergySystem : MonoBehaviour
     private float currentEnergy;
     private float consumedEnergy;
 
+    private PlayerUI playerUI;
+
     public float CurrentEnergy => currentEnergy;
     public float MaxEnergy => maxEnergy;
     public float EnergyConsumptionRate => energyConsumptionRate;
     public float EnergyGainAmount => energyGainAmount;
     public bool IsEnergyEmpty => currentEnergy < energyConsumptionRate;
+
+    public void Initialize(PlayerUI playerUI)
+    {
+        this.playerUI = playerUI;
+        ResetEnergy();
+    }
 
     private void Start()
     {
@@ -59,10 +63,7 @@ public class EnergySystem : MonoBehaviour
 
     private void UpdateEnergyBar()
     {
-        if (energyCircle != null)
-            energyCircle.fillAmount = currentEnergy / maxEnergy;
-        
-        if (energyBar != null)
-            energyBar.value = currentEnergy / maxEnergy;
+        if (playerUI != null)
+            playerUI.SetEnergyUI(currentEnergy, maxEnergy);
     }
 }

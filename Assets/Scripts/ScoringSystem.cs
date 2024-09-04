@@ -1,68 +1,65 @@
 using TMPro;
 using UnityEngine;
+using System;
 
 public class ScoringSystem : MonoBehaviour
 {
-    public TextMeshProUGUI scoreText;
     private int currentScore;
+    private int highScore;
+
+    public event Action<Tuple<int, int>> OnScoreChanged;
+    public event Action<int> OnHighScoreChanged;
 
     void Start()
     {
         currentScore = 0;
-        UpdateScoreText();
+        highScore = PlayerPrefsManager.Instance.LoadInt(PlayerPrefsKeys.HighScore, 0);
+        OnScoreChanged?.Invoke(new Tuple<int, int>(currentScore, highScore));
     }
 
     public void AddScore(int amount)
     {
         currentScore += amount;
-        UpdateScoreText();
+        OnScoreChanged?.Invoke(new Tuple<int, int>(currentScore, highScore));
+
+        if (currentScore > highScore)
+        {
+            highScore = currentScore;
+            PlayerPrefsManager.Instance.SaveInt(PlayerPrefsKeys.HighScore, highScore);
+            OnHighScoreChanged?.Invoke(highScore);
+        }
     }
 
-    private void UpdateScoreText()
-    {
-        scoreText.text = $"{currentScore} <size=42><color=#9399a3>/ {PlayerPrefsManager.Instance.LoadInt(PlayerPrefsKeys.HighScore, 0)}</size></color>";
-        
-    }
-    
-    public int GetFinalScore()
+    public int GetCurrentScore()
     {
         return currentScore;
+    }
+
+    public int GetHighScore()
+    {
+        return highScore;
     }
 
     public void ResetScore()
     {
         currentScore = 0;
-        UpdateScoreText();
+        OnScoreChanged?.Invoke(new Tuple<int, int>(currentScore, highScore));
     }
 
-    public string GetScoreLevel(int score)
+    public static string GetScoreLevel(int score)
     {
-        if (score >= (int)ScoreLevel.S)
-        {
-            return "S";
-        }
-        if (score >= (int)ScoreLevel.A)
-        {
-            return "A";
-        }
-        if (score >= (int)ScoreLevel.B)
-        {
-            return "B";
-        }
-        if (score >= (int)ScoreLevel.C)
-        {
-            return "C";
-        }
-        if (score >= (int)ScoreLevel.D)
-        {
-            return "D";
-        }
-        if (score >= (int)ScoreLevel.F)
-        {
-            return "F";
-        }
-
+        if (score >= (int)ScoreLevel.S) return "S";
+        if (score >= (int)ScoreLevel.A) return "A";
+        if (score >= (int)ScoreLevel.B) return "B";
+        if (score >= (int)ScoreLevel.C) return "C";
+        if (score >= (int)ScoreLevel.D) return "D";
+        if (score >= (int)ScoreLevel.F) return "F";
         return "F";
+    }
+
+    public void RefreshHighestScoreLevelText(TextMeshProUGUI scoreLevelText)
+    {
+        scoreLevelText.text = GetScoreLevel(highScore);
     }
 }
 

@@ -1,24 +1,34 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class ObjectPool : MonoBehaviour
 {
     public GameObject objectPrefab;
     public int initialPoolSize = 10;
-    private Queue<GameObject> objectPool = new Queue<GameObject>();
+    private List<GameObject> objectPool = new List<GameObject>();
     public List<GameObject> activeObjList = new();
 
     void Start()
     {
-        if (objectPool.Count < initialPoolSize)
+        LogManager.Instance.Log($"ObjectPool: Initializing pool for {objectPrefab.name}");
+        InitializePool();
+    }
+
+    private void InitializePool()
+    {
+        for (int i = 0; i < initialPoolSize; i++)
         {
-            for (int i = 0; i < initialPoolSize; i++)
-            {
-                GameObject obj = Instantiate(objectPrefab);
-                obj.SetActive(false);
-                objectPool.Enqueue(obj);
-            }
+            CreateNewObject();
         }
+    }
+
+    private GameObject CreateNewObject()
+    {
+        GameObject obj = Instantiate(objectPrefab);
+        obj.SetActive(false);
+        objectPool.Add(obj);
+        return obj;
     }
 
     public GameObject GetObject()
@@ -26,21 +36,19 @@ public class ObjectPool : MonoBehaviour
         GameObject obj;
         if (objectPool.Count > 0)
         {
-            obj = objectPool.Dequeue();
+            int lastIndex = objectPool.Count - 1;
+            obj = objectPool[lastIndex];
+            objectPool.RemoveAt(lastIndex);
         }
         else
         {
-            obj = Instantiate(objectPrefab);
+            obj = CreateNewObject();
         }
 
+        LogManager.Instance.Log($"ObjectPool: Getting object {obj.name} from pool");
         if (!activeObjList.Contains(obj))
         {
-            // Debug.LogWarning("Object added into active list during getting!");
             activeObjList.Add(obj);
-        }
-        else
-        {
-            // Debug.LogWarning("Object added into active list during Getting!");
         }
         obj.SetActive(true);
         InitializeObject(obj);
@@ -49,6 +57,7 @@ public class ObjectPool : MonoBehaviour
 
     public void ReturnObject(GameObject obj)
     {
+        LogManager.Instance.Log($"ObjectPool: Returning object {obj.name} to pool");
         if (!activeObjList.Contains(obj))
         {
             Debug.LogWarning("Object not found in active list during return!");
@@ -56,25 +65,29 @@ public class ObjectPool : MonoBehaviour
         }
         activeObjList.Remove(obj);
         obj.SetActive(false);
-        if (objectPool.Contains(obj))
+        if (!objectPool.Contains(obj))
         {
-            Debug.LogWarning("You cannot enqueue game object that already in the q");
-            return;
+            objectPool.Add(obj);
         }
-        objectPool.Enqueue(obj);
     }
-    
+
+    public void ReturnAllObjects()
+    {
+        foreach (var obj in activeObjList.ToList())
+        {
+            ReturnObject(obj);
+        }
+    }
+
     private void InitializeObject(GameObject obj)
     {
-        EvilBall evilBall = obj.GetComponent<EvilBall>();
-        if (evilBall != null)
+        LogManager.Instance.Log($"ObjectPool: Initializing object {obj.name}");
+        if (obj.TryGetComponent(out EvilBall evilBall))
         {
             evilBall.EvilBallPool = this;
-            evilBall.SetRandomHealth();  // Assign random health
         }
 
-        NormalBall normalBall = obj.GetComponent<NormalBall>();
-        if (normalBall != null)
+        if (obj.TryGetComponent(out NormalBall normalBall))
         {
             normalBall.NormalBallPool = this;
         }

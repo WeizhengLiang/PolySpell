@@ -2,17 +2,18 @@ using UnityEngine;
 
 public class BGMManager : MonoBehaviour
 {
-    public static BGMManager Instance;
-    public AudioSource bgmSource;
+    public static BGMManager Instance { get; private set; }
+    [SerializeField] private AudioSource bgmSource;
+    [SerializeField] private float pitchTransitionSpeed = 0.5f;
+    
+    private SlowMotionManager slowMotionManager;
 
-    public SlowMotionManager SlowMotionManager;
-
-    public float pitchTransitionSpeed = 0.5f; // Adjust this value for smoother or quicker transitions
     private void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
+            // DontDestroyOnLoad(gameObject);
         }
         else
         {
@@ -20,9 +21,21 @@ public class BGMManager : MonoBehaviour
         }
     }
     
+    public void Initialize(SlowMotionManager slowMotionManager)
+    {
+        this.slowMotionManager = slowMotionManager;
+    }
+    
     private void Update()
     {
-        if (Mathf.Abs(bgmSource.pitch - Time.timeScale) > 0.01f && SlowMotionManager.inSlowMotion)
+        UpdateBGMPitch();
+    }
+
+    private void UpdateBGMPitch()
+    {
+        if (bgmSource == null || slowMotionManager == null) return;
+
+        if (Mathf.Abs(bgmSource.pitch - Time.timeScale) > 0.01f && slowMotionManager.inSlowMotion)
         {
             bgmSource.pitch = Mathf.MoveTowards(bgmSource.pitch, Time.timeScale, pitchTransitionSpeed * Time.unscaledDeltaTime);
         }
@@ -32,9 +45,19 @@ public class BGMManager : MonoBehaviour
         }
     }
 
+    public void ToggleBGM(bool isOn)
+    {
+        PlayerPrefsManager.Instance.SaveInt(PlayerPrefsKeys.BgmOn, isOn ? 1 : 0);
+        if (isOn)
+            PlayBGM();
+        else
+            StopBGM();
+    }
+
     public void PlayBGM()
     {
-        if (!bgmSource.isPlaying)
+        if (bgmSource == null) return;
+        if (PlayerPrefsManager.Instance.LoadInt(PlayerPrefsKeys.BgmOn, 1) == 1 && !bgmSource.isPlaying)
         {
             bgmSource.Play();
         }
@@ -42,6 +65,7 @@ public class BGMManager : MonoBehaviour
 
     public void StopBGM()
     {
+        if (bgmSource == null) return;
         if (bgmSource.isPlaying)
         {
             bgmSource.Stop();
@@ -50,11 +74,13 @@ public class BGMManager : MonoBehaviour
 
     public void SetVolume(float volume)
     {
+        if (bgmSource == null) return;
         bgmSource.volume = volume;
     }
 
     public void PauseBGM()
     {
+        if (bgmSource == null) return;
         if (bgmSource.isPlaying)
         {
             bgmSource.Pause();
@@ -63,6 +89,7 @@ public class BGMManager : MonoBehaviour
 
     public void ResumeBGM()
     {
+        if (bgmSource == null) return;
         if (bgmSource.time > 0)
         {
             bgmSource.UnPause();
@@ -71,5 +98,10 @@ public class BGMManager : MonoBehaviour
         {
             PlayBGM();
         }
+    }
+
+    public bool IsBGMPlaying()
+    {
+        return bgmSource != null && bgmSource.isPlaying;
     }
 }

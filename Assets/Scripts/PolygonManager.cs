@@ -7,6 +7,8 @@ public class PolygonManager
     public List<Vector2> SegmentEndPositions { get; private set; } = new List<Vector2>();
     public float PolygonEnergy { get; private set; }
 
+    public List<GameObject> PolygonVisualizerList { get; private set; } = new ();
+
     public void AddSegment(Vector2 start, Vector2 end)
     {
         SegmentStartPositions.Add(start);
@@ -33,5 +35,27 @@ public class PolygonManager
             points.Add(SegmentEndPositions[i]);
         }
         return points;
+    }
+
+    public void ClearPolygonVisualizerList()
+    {
+        foreach (var visualizer in PolygonVisualizerList)
+        {
+            if (visualizer != null)
+            {
+                GameObject.Destroy(visualizer);
+            }
+        }
+        PolygonVisualizerList.Clear();
+    }
+
+    public void AddPolygonVisualizer(GameObject visualizer)
+    {
+        PolygonVisualizerList.Add(visualizer);
+    }
+
+    public void RemovePolygonVisualizer(GameObject visualizer)
+    {
+        PolygonVisualizerList.Remove(visualizer);
     }
 }

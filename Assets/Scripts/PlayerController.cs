@@ -1,68 +1,82 @@
 using UnityEngine;
+using System;
 using System.Collections.Generic;
-using Kalkatos.DottedArrow;
-using Random = UnityEngine.Random;
 
 public class PlayerController : MonoBehaviour
 {
-    public GameManager GameManager;
-    public EnergySystem EnergySystem;
-    public HealthSystem HealthSystem;
-    public ScoringSystem ScoringSystem;
-    public SlowMotionManager SlowMotionManager;
-    [SerializeField] private GameObject polygonVisualizerPrefab;
-    public GameObject Marker;
-    public GameObject Marker2;
-    public GameObject notificationDisplayPrefab;
-    public Arrow Arrow;
-    public BallSpawner BallSpawner;
+    public event Action<PlayerController> OnDeath;
+
+    private GameManager gameManager;
+    private EnergySystem energySystem;
+    private HealthSystem healthSystem;
+    private ScoringSystem scoringSystem;
+    private SlowMotionManager slowMotionManager;
+    private GameObject polygonVisualizerPrefab;
+    private BallSpawner ballSpawner;
+    private PlayerUI playerUI;
 
     private MovementController movementController;
     private PolygonManager polygonManager;
     private PolygonHandler polygonHandler;
+    private Rigidbody2D rb;
+    private TrailRenderer trailRenderer;
+
     private float energyConsumedForCurrentTrait = 0f;
     private Vector2 lastPosition;
-    private Rigidbody2D rb;
-    private TrailRenderer _trailRenderer;
     private Dictionary<Vector2, (float, int)> intersectionResults = new();
     private bool isNewPolygon = true;
-    private float timeEnergyRunOut = -1f;
-    private bool afterEnergyDrained;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
-        _trailRenderer = GetComponent<TrailRenderer>();
+        trailRenderer = GetComponent<TrailRenderer>();
         movementController = new MovementController(rb);
         polygonManager = new PolygonManager();
-        polygonHandler = new PolygonHandler(polygonManager, EnergySystem, HealthSystem, ScoringSystem, BallSpawner, polygonVisualizerPrefab);
     }
 
-    void Start()
+    private void Start()
     {
         lastPosition = transform.position;
+        ResetPlayer();
     }
 
-    void Update()
+    private void Update()
     {
-        Vector2 currentPosition = transform.position;
+        if (gameManager == null || !gameManager.IsGameRunning) return;
 
+        Vector2 currentPosition = transform.position;
         HandleMouseInput(currentPosition);
         HandleMovement(currentPosition);
     }
 
+    public void Initialize(GameManager gameManager, EnergySystem energySystem, HealthSystem healthSystem, ScoringSystem scoringSystem, SlowMotionManager slowMotionManager, GameObject polygonVisualizerPrefab, BallSpawner ballSpawner, PlayerUI playerUI)
+    {
+        this.gameManager = gameManager;
+        this.energySystem = energySystem;
+        this.healthSystem = healthSystem;
+        this.scoringSystem = scoringSystem;
+        this.slowMotionManager = slowMotionManager;
+        this.polygonVisualizerPrefab = polygonVisualizerPrefab;
+        this.ballSpawner = ballSpawner;
+        this.playerUI = playerUI;
+
+        energySystem.Initialize(playerUI);
+        healthSystem.Initialize(playerUI);
+        polygonHandler = new PolygonHandler(polygonManager, energySystem, healthSystem, scoringSystem, ballSpawner, polygonVisualizerPrefab);
+    }
+
     private void HandleMouseInput(Vector2 currentPosition)
     {
-        if (Input.GetMouseButtonDown(0) && GameManager.gameUI.activeSelf && !SlowMotionManager.inSlowMotion && !GameManager.IsPaused)
+        if (Input.GetMouseButtonDown(0) && gameManager.IsGameRunning && !slowMotionManager.inSlowMotion && !gameManager.IsPaused)
         {
-            SlowMotionManager.EnterSlowMotion();
-            Arrow.SetupAndActivate(transform);
+            slowMotionManager.EnterSlowMotion();
+            playerUI.SetupAndActivateArrow(transform);
         }
-        
-        if (Input.GetMouseButtonUp(0) && GameManager.gameUI.activeSelf && SlowMotionManager.inSlowMotion && !GameManager.IsPaused)
+
+        if (Input.GetMouseButtonUp(0) && gameManager.IsGameRunning && slowMotionManager.inSlowMotion && !gameManager.IsPaused)
         {
-            Arrow.Deactivate();
-            SlowMotionManager.ExitSlowMotion();
+            playerUI.DeactivateArrow();
+            slowMotionManager.ExitSlowMotion();
 
             rb.velocity = Vector2.zero;
 
@@ -70,19 +84,19 @@ public class PlayerController : MonoBehaviour
             movementController.SetDirection(mousePosition - currentPosition);
             movementController.Shoot();
 
-            if (!EnergySystem.IsEnergyEmpty)
+            if (!energySystem.IsEnergyEmpty)
             {
                 if (isNewPolygon)
                 {
                     lastPosition = transform.position;
                     isNewPolygon = false;
                 }
-                _trailRenderer.enabled = true;
+                trailRenderer.enabled = true;
 
                 if (lastPosition != currentPosition)
                 {
                     float distance = Vector2.Distance(lastPosition, currentPosition);
-                    energyConsumedForCurrentTrait += distance * EnergySystem.EnergyConsumptionRate;
+                    energyConsumedForCurrentTrait += distance * energySystem.EnergyConsumptionRate;
                     polygonManager.AddSegment(lastPosition, currentPosition);
                 }
                 lastPosition = currentPosition;
@@ -93,7 +107,7 @@ public class PlayerController : MonoBehaviour
 
     private void HandleMovement(Vector2 currentPosition)
     {
-        if (_trailRenderer.enabled)
+        if (trailRenderer.enabled)
         {
             float currentLength = Vector2.Distance(lastPosition, currentPosition);
             foreach (var keyValuePair in intersectionResults)
@@ -104,27 +118,27 @@ public class PlayerController : MonoBehaviour
                     var startEndTrailPoint = keyValuePair.Key;
                     polygonHandler.HandlePolygonFormation(startEndTrailPoint, polygonType);
                     ClearData();
-                    _trailRenderer.Clear();
-                    _trailRenderer.enabled = false;
+                    trailRenderer.Clear();
+                    trailRenderer.enabled = false;
                     isNewPolygon = true;
                     break;
                 }
             }
-            float energyCost = EnergySystem.EnergyConsumptionRate * currentLength * Time.deltaTime;
+            float energyCost = energySystem.EnergyConsumptionRate * currentLength * Time.deltaTime;
             energyConsumedForCurrentTrait += energyCost;
-            if (!EnergySystem.ConsumeEnergy(energyCost))
+            if (!energySystem.ConsumeEnergy(energyCost))
             {
-                if (_trailRenderer.positionCount > 0)
+                if (trailRenderer.positionCount > 0)
                 {
                     ClearTrailAndRestoreEnergy();
                 }
                 ClearData();
-                _trailRenderer.enabled = false;
+                trailRenderer.enabled = false;
                 isNewPolygon = true;
             }
             else
             {
-                _trailRenderer.time = 50f;
+                trailRenderer.time = 50f;
             }
         }
     }
@@ -167,7 +181,7 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
-    
+
     int DeterminePolygonType(int segmentIndex)
     {
         int edgeCount = polygonManager.SegmentStartPositions.Count - segmentIndex;
@@ -224,7 +238,7 @@ public class PlayerController : MonoBehaviour
             var OnSegment2 = IsPointOnLineSegment(p2, q2, intersection);
             var OnSegment1 = IsPointOnLineSegment(p1, intersection, intersection);
             var dotProduct = Vector2.Dot(intersection - p1, dir);
-            
+
             if (OnSegment2 && OnSegment1 && intersection != p1 && dotProduct > 0)
             {
                 return true;
@@ -253,16 +267,16 @@ public class PlayerController : MonoBehaviour
             {
                 HandleSpeedPowerUp();
             }
-            else if(normalBall.powerUp == NormalBall.PowerUpType.None)
+            else if (normalBall.powerUp == NormalBall.PowerUpType.None)
             {
                 StartCoroutine(VFXManager.Instance.SpawnTextVFX($"+{1}", ColorCombo.Hex2Color(ColorCombo.AddNormalScore_3), normalBall.transform.position));
             }
-            
+
             normalBall.TriggerDieVFX(col.transform.position);
-            
-            BallSpawner.normalBallPool.ReturnObject(col.gameObject);
-            EnergySystem.GainEnergy(EnergySystem.EnergyGainAmount);
-            ScoringSystem.AddScore(1);
+
+            ballSpawner.ballTypes.Find(info => info.type == BallSpawner.BallType.Normal).pool.ReturnObject(col.gameObject);
+            energySystem.GainEnergy(energySystem.EnergyGainAmount);
+            scoringSystem.AddScore(1);
         }
     }
 
@@ -272,19 +286,19 @@ public class PlayerController : MonoBehaviour
         if (scale.x >= 0.5f)
         {
             transform.localScale = scale;
-            StartCoroutine(VFXManager.Instance.SpawnTextVFX("Size Down!", ColorCombo.Hex2Color(ColorCombo.RegularText_3),transform.position));
+            StartCoroutine(VFXManager.Instance.SpawnTextVFX("Size Down!", ColorCombo.Hex2Color(ColorCombo.RegularText_3), transform.position));
         }
         else
         {
             transform.localScale = new Vector3(0.5f, 0.5f, 1f);
-            StartCoroutine(VFXManager.Instance.SpawnTextVFX("Min Size!", ColorCombo.Hex2Color(ColorCombo.RegularText_3),transform.position));
+            StartCoroutine(VFXManager.Instance.SpawnTextVFX("Min Size!", ColorCombo.Hex2Color(ColorCombo.RegularText_3), transform.position));
         }
-        _trailRenderer.startWidth = transform.localScale.x;
+        trailRenderer.startWidth = transform.localScale.x;
     }
 
     private void HandleSpeedPowerUp()
     {
-        StartCoroutine(VFXManager.Instance.SpawnTextVFX("Speed Up!", ColorCombo.Hex2Color(ColorCombo.RegularText_3),transform.position));
+        StartCoroutine(VFXManager.Instance.SpawnTextVFX("Speed Up!", ColorCombo.Hex2Color(ColorCombo.RegularText_3), transform.position));
         movementController.SetDirection(movementController.CurrentDirection * 1.15f);
     }
 
@@ -292,67 +306,91 @@ public class PlayerController : MonoBehaviour
     {
         var normal = col.contacts[0].normal;
         movementController.Bounce(normal);
-        
-        if (_trailRenderer.enabled)
+
+        if (trailRenderer.enabled)
         {
             Vector2 currentPosition = transform.position;
             if (lastPosition != currentPosition)
             {
                 float distance = Vector2.Distance(lastPosition, currentPosition);
-                energyConsumedForCurrentTrait += distance * EnergySystem.EnergyConsumptionRate;
+                energyConsumedForCurrentTrait += distance * energySystem.EnergyConsumptionRate;
                 polygonManager.AddSegment(lastPosition, currentPosition);
                 lastPosition = currentPosition;
                 CalculatePotentialIntersections(lastPosition, movementController.CurrentDirection);
             }
         }
-        
+
         if (col.gameObject.CompareTag("EvilBall"))
         {
             Vector2 contactPoint = col.contacts[0].point;
             StartCoroutine(VFXManager.Instance.SpawnTextVFX($"-{10}", ColorCombo.Hex2Color(ColorCombo.DamageText_3), transform.position));
-            VFXManager.Instance.SpawnVFX(VFXType.hitEffect, VFXManager.Instance.hitEffectPrefab, contactPoint);
-            HealthSystem.TakeDamage(10f);
+            VFXManager.Instance.SpawnVFX(VFXType.hitEffect, contactPoint);
+            healthSystem.TakeDamage(10f);
+
+            if (healthSystem.CurrentHealth <= 0)
+            {
+                Die();
+            }
         }
     }
 
     private void ClearTrailAndRestoreEnergy()
     {
         float trailLength = CalculateTrailLength();
-        float energyRestored = trailLength * EnergySystem.EnergyConsumptionRate;
-        EnergySystem.GainEnergy(energyRestored);
-        _trailRenderer.Clear();
-        _trailRenderer.enabled = false;
+        float energyRestored = trailLength * energySystem.EnergyConsumptionRate;
+        energySystem.GainEnergy(energyRestored);
+        trailRenderer.Clear();
+        trailRenderer.enabled = false;
     }
 
     private float CalculateTrailLength()
     {
         float length = 0f;
-        for (int i = 0; i < _trailRenderer.positionCount - 1; i++)
+        for (int i = 0; i < trailRenderer.positionCount - 1; i++)
         {
-            length += Vector3.Distance(_trailRenderer.GetPosition(i), _trailRenderer.GetPosition(i + 1));
+            length += Vector3.Distance(trailRenderer.GetPosition(i), trailRenderer.GetPosition(i + 1));
         }
         return length;
     }
-    
+
     public void ResetPlayer()
     {
         StopAllCoroutines();
-        
+        polygonManager.ClearPolygonVisualizerList();
+
         transform.position = Vector2.zero;
         rb.velocity = Vector2.zero;
         transform.localScale = new Vector3(0.6f, 0.6f, 1);
         movementController = new MovementController(rb);
 
-        _trailRenderer.Clear();
-        _trailRenderer.enabled = false;
-        _trailRenderer.startWidth = 0.6f;
+        if (trailRenderer != null)
+        {
+            trailRenderer.Clear();
+            trailRenderer.enabled = false;
+        }
+        trailRenderer.startWidth = 0.6f;
 
         isNewPolygon = true;
         energyConsumedForCurrentTrait = 0f;
         lastPosition = transform.position;
         polygonManager.ClearSegments();
 
-        HealthSystem.ResetHealth();
-        EnergySystem.ResetEnergy();
+        healthSystem.ResetHealth();
+        energySystem.ResetEnergy();
+    }
+
+    public void HandleExternalInput(Vector2 inputDirection, bool isMoving)
+    {
+        if (isMoving)
+        {
+            movementController.SetDirection(inputDirection);
+            movementController.Shoot();
+        }
+    }
+
+    private void Die()
+    {
+        // 死亡逻辑
+        OnDeath?.Invoke(this);
     }
 }

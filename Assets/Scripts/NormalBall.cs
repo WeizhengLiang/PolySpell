@@ -6,7 +6,7 @@ using Random = UnityEngine.Random;
 public class NormalBall : MonoBehaviour
 {
     public ObjectPool NormalBallPool;
-    public float speed = 1f;  // Speed of the normal ball
+    public float speed = 1f;
     public Sprite NormalBallPrefab;
     public Sprite SizeBallPrefab;
     public Sprite SpeedBallPrefab;
@@ -17,33 +17,39 @@ public class NormalBall : MonoBehaviour
     public TextMeshProUGUI Text;
 
     private Rigidbody2D rb;
-
     private Vector2 direction;
-    void Start()
+
+    private void Awake()
     {
-        // Debug.Log("start");
-        // Initialize();
+        rb = GetComponent<Rigidbody2D>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     private void OnEnable()
     {
-        Debug.Log("onenable");
-        rb = GetComponent<Rigidbody2D>();
-        direction = Random.insideUnitCircle.normalized;
-        rb.velocity = direction * speed;
-    }
-    
-
-    void Update()
-    {
-        // Move the normal ball in the assigned direction
-        // transform.Translate(direction * speed * Time.deltaTime);
+        Initialize();
     }
 
     public void Initialize(bool fromTrait = false)
     {
         AssignPowerUp(fromTrait);
-        spriteRenderer = GetComponent<SpriteRenderer>();
+        UpdateSprite();
+        SetInitialVelocity();
+    }
+
+    void AssignPowerUp(bool fromTrait = false)
+    {
+        if (fromTrait)
+        {
+            powerUp = PowerUpType.Trail;
+            return;
+        }
+        float chance = Random.Range(0f, 1f);
+        powerUp = chance < 0.1f ? (PowerUpType)Random.Range(1, 3) : PowerUpType.None;
+    }
+
+    void UpdateSprite()
+    {
         switch (powerUp)
         {
             case PowerUpType.Trail:
@@ -64,30 +70,16 @@ public class NormalBall : MonoBehaviour
                 break;
         }
     }
-    
-    void AssignPowerUp(bool fromTrait = false)
+
+    void SetInitialVelocity()
     {
-        if (fromTrait)
-        {
-            powerUp = PowerUpType.Trail;
-            Debug.Log("Assigned PowerUp: Trail");
-            return;
-        }
-        float chance = Random.Range(0f, 1f);
-        if (chance < 0.1f)  // 20% chance to be a power-up ball
-        {
-            powerUp = (PowerUpType)Random.Range(1, 3);
-        }
-        else
-        {
-            powerUp = PowerUpType.None;
-        }
-        Debug.Log("Assigned PowerUp: " + powerUp);
+        direction = Random.insideUnitCircle.normalized;
+        rb.velocity = direction * speed;
     }
 
     private void OnBecameInvisible()
     {
-        if (gameObject.activeSelf) // only when it ran out of view
+        if (gameObject.activeSelf)
         {
             ReturnToPool();
         }
@@ -109,45 +101,41 @@ public class NormalBall : MonoBehaviour
 
     public void TriggerDieVFX(Vector2 pos)
     {
+        VFXType effectType = VFXType.killEffectBlue;
+
         switch (powerUp)
         {
             case PowerUpType.Size:
-                VFXManager.Instance.SpawnVFXWithFadeOut(VFXType.killEffectYellow ,VFXManager.Instance.killEffectYellowPrefab, pos, 1f);
+                effectType = VFXType.killEffectYellow;
                 break;
             case PowerUpType.Speed:
-                VFXManager.Instance.SpawnVFXWithFadeOut(VFXType.killEffectPurple ,VFXManager.Instance.killEffectPurplePrefab, pos, 1f);
-                break;
-            case PowerUpType.None:
-                VFXManager.Instance.SpawnVFXWithFadeOut(VFXType.killEffectBlue ,VFXManager.Instance.killEffectBluePrefab, pos, 1f);
+                effectType = VFXType.killEffectPurple;
                 break;
             case PowerUpType.Trail:
-                VFXManager.Instance.SpawnVFXWithFadeOut(VFXType.killEffectWhite ,VFXManager.Instance.killEffectWhitePrefab, pos, 1f);
+                effectType = VFXType.killEffectWhite;
                 break;
         }
+
+        VFXManager.Instance.SpawnVFXWithFadeOut(effectType, pos, 1f);
     }
     
     public VFX TriggerSpawnVFX(Vector2 pos)
     {
-        VFX vfx;
+        VFXType effectType = VFXType.BlueSpawningEffect;
+
         switch (powerUp)
         {
             case PowerUpType.Size:
-                vfx = VFXManager.Instance.SpawnVFX(VFXType.YelloSpawningEffect ,VFXManager.Instance.YelloSpawningEffectPrefab, pos);
+                effectType = VFXType.YelloSpawningEffect;
                 break;
             case PowerUpType.Speed:
-                vfx = VFXManager.Instance.SpawnVFX(VFXType.PurpleSpawningEffect ,VFXManager.Instance.PurpleSpawningEffectPrefab, pos);
-                break;
-            case PowerUpType.None:
-                vfx = VFXManager.Instance.SpawnVFX(VFXType.BlueSpawningEffect ,VFXManager.Instance.BlueSpawningEffectPrefab, pos);
+                effectType = VFXType.PurpleSpawningEffect;
                 break;
             case PowerUpType.Trail:
-                vfx = VFXManager.Instance.SpawnVFX(VFXType.WhiteSpawningEffect ,VFXManager.Instance.WhiteSpawningEffectPrefab, pos);
-                break;
-            default:
-                vfx = VFXManager.Instance.SpawnVFX(VFXType.BlueSpawningEffect ,VFXManager.Instance.BlueSpawningEffectPrefab, pos);
+                effectType = VFXType.WhiteSpawningEffect;
                 break;
         }
-        Debug.Log("detect PowerUp: " + powerUp);
-        return vfx;
+
+        return VFXManager.Instance.SpawnVFX(effectType, pos);
     }
 }
