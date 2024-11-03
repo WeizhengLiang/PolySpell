@@ -56,14 +56,17 @@ public class VFXManager : MonoBehaviour
 
     private VFX GetOrCreateVFX(VFXType type, Vector2 position)
     {
-        VFX vfx;
-        if (vfxPools[type].Count > 0)
+        VFX vfx = null;
+        while (vfx == null && vfxPools[type].Count > 0)
         {
             vfx = vfxPools[type].Dequeue();
+        }
+
+        if (vfx?.go != null)
+        {
             vfx.go.transform.position = position;
             vfx.go.SetActive(true);
-        }
-        else
+        }else
         {
             GameObject prefab = vfxPrefabs.Find(p => p.type == type).prefab;
             GameObject vfxObject = Instantiate(prefab, position, Quaternion.identity);
