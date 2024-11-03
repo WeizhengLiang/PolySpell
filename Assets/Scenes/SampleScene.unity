@@ -3130,6 +3130,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Status_Star
       objectReference: {fileID: 0}
+    - target: {fileID: 7030508545788578712, guid: dda6693ac8385471c94173a0ee415c46, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -3693,6 +3697,10 @@ PrefabInstance:
     - target: {fileID: 8098387188632913414, guid: 334417e62ec9d4a36a53f2c4db0f4294, type: 3}
       propertyPath: m_Name
       value: EnergyBar
+      objectReference: {fileID: 0}
+    - target: {fileID: 8098387188632913414, guid: 334417e62ec9d4a36a53f2c4db0f4294, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -5639,6 +5647,7 @@ GameObject:
   - component: {fileID: 519420031}
   - component: {fileID: 519420029}
   - component: {fileID: 519420030}
+  - component: {fileID: 519420033}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -5764,6 +5773,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &519420033
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 519420028}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d326b6377462425fb0f1ff328de6e0f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &522193611 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2922153208528758120, guid: dda6693ac8385471c94173a0ee415c46, type: 3}
@@ -10724,6 +10745,7 @@ MonoBehaviour:
   tutorialManager: {fileID: 26833133}
   soundEffectManager: {fileID: 2118748914}
   bgmManager: {fileID: 1891480925}
+  cameraFollowBob: {fileID: 519420033}
 --- !u!4 &1000668180
 Transform:
   m_ObjectHideFlags: 0
@@ -15684,6 +15706,38 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2108601912}
     m_Modifications:
+    - target: {fileID: 685738307493822952, guid: 27661a3ea4b619a45b23ad43d8680d54, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 685738307500452889, guid: 27661a3ea4b619a45b23ad43d8680d54, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 685738307895460652, guid: 27661a3ea4b619a45b23ad43d8680d54, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 685738307927943484, guid: 27661a3ea4b619a45b23ad43d8680d54, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 685738308406939938, guid: 27661a3ea4b619a45b23ad43d8680d54, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 685738309345455589, guid: 27661a3ea4b619a45b23ad43d8680d54, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 685738309350548359, guid: 27661a3ea4b619a45b23ad43d8680d54, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2910320706234588341, guid: 27661a3ea4b619a45b23ad43d8680d54, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4447701960781706649, guid: 27661a3ea4b619a45b23ad43d8680d54, type: 3}
       propertyPath: m_Name
       value: Arrow
@@ -15775,6 +15829,14 @@ PrefabInstance:
     - target: {fileID: 4447701960781706655, guid: 27661a3ea4b619a45b23ad43d8680d54, type: 3}
       propertyPath: origin
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 4447701961321624539, guid: 27661a3ea4b619a45b23ad43d8680d54, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7170626008830330633, guid: 27661a3ea4b619a45b23ad43d8680d54, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -17171,9 +17233,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2a693bff7bf641ed8b83cafd81bec48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxEnergy: 100
-  energyConsumptionRate: 5
-  energyGainAmount: 10
+  maxEnergy: 500
+  energyConsumptionRate: 10
+  energyGainAmount: 20
 --- !u!4 &1909041856
 Transform:
   m_ObjectHideFlags: 0

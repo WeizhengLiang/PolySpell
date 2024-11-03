@@ -3,8 +3,8 @@ using UnityEngine;
 public class EnergySystem : MonoBehaviour
 {
     [Header("Energy Settings")]
-    [SerializeField] private float maxEnergy = 100f;
-    [SerializeField] private float energyConsumptionRate = 0.5f;
+    [SerializeField] private float maxEnergy = 200f;
+    [SerializeField] private float energyConsumptionRate = 5f;
     [SerializeField] private float energyGainAmount = 10f;
 
     private float currentEnergy;

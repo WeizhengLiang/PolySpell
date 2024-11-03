@@ -7,12 +7,13 @@ public class EvilBall : MonoBehaviour
     public Transform player;
     public GameObject Shield;
     public ScoringSystem ScoringSystem;
-    [SerializeField] private int minHealthRandom = 200;
-    [SerializeField] private int maxHealthRandom = 500;
+    [SerializeField] private int minHealthRandom = 20;
+    [SerializeField] private int maxHealthRandom = 50;
     public ObjectPool EvilBallPool;
-    public float health = 100f;
+    public float health = 10f;
     public TextMeshProUGUI healthText;
-    public float healthGainAmount = 10f;
+    public float healthGainAmount = 2f;
+    public int DamagerMultiplier = 10;
 
     private Rigidbody2D rb;
     [SerializeField] private float baseSpeed = 2f;
@@ -73,6 +74,11 @@ public class EvilBall : MonoBehaviour
         LogManager.Instance.Log($"EvilBall {instanceId} MoveTowardsPlayer: Direction: {direction}, Velocity: {rb.velocity}, Position: {transform.position}");
     }
 
+    public int CalculateDamage(int damage)
+    {
+        return damage * DamagerMultiplier;
+    }
+
     public void TakeDamage(int damage)
     {
         if (hasShield)
@@ -80,7 +86,7 @@ public class EvilBall : MonoBehaviour
             LogManager.Instance.Log("Shield absorbed damage");
             return;
         }
-        health -= damage;
+        health -= CalculateDamage(damage);
         UpdateHealthText();
         if (health <= 0)
         {

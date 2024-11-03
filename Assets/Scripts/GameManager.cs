@@ -17,6 +17,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TutorialManager tutorialManager;
     [SerializeField] private SoundEffectManager soundEffectManager;
     [SerializeField] private BGMManager bgmManager;
+    // [SerializeField] private CameraFollowBob cameraFollowBob;
 
     private void Awake()
     {
@@ -70,7 +71,7 @@ public class GameManager : MonoBehaviour
             HandleEscapeKey();
         }
     }
-
+    
     private void HandleEscapeKey()
     {
         switch (stateManager.CurrentState)
@@ -143,6 +144,7 @@ public class GameManager : MonoBehaviour
         timeManager.StartTimer(60f);
         playerManager.InitializeOrSpawnPlayer(Vector3.zero);
         ballSpawner.StartSpawning();
+        // cameraFollowBob.SetFollowCam();
     }
 
     private void EndGame()

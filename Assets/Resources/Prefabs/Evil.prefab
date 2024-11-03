@@ -166,12 +166,13 @@ MonoBehaviour:
   player: {fileID: 0}
   Shield: {fileID: 3540937828778122866}
   ScoringSystem: {fileID: 0}
-  minHealthRandom: 30
-  maxHealthRandom: 200
+  minHealthRandom: 20
+  maxHealthRandom: 50
   EvilBallPool: {fileID: 0}
-  health: 100
+  health: 10
   healthText: {fileID: 1830940811852051776}
-  healthGainAmount: 5
+  healthGainAmount: 2
+  baseSpeed: 2
 --- !u!1 &3540937828778122866
 GameObject:
   m_ObjectHideFlags: 0
